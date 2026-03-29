@@ -1,0 +1,103 @@
+/* Light mode: black on white */
+:root {
+  --ifm-color-primary: #18181b;
+  --ifm-color-primary-dark: #111114;
+  --ifm-color-primary-darker: #0d0d0f;
+  --ifm-color-primary-darkest: #000000;
+  --ifm-color-primary-light: #27272a;
+  --ifm-color-primary-lighter: #3f3f46;
+  --ifm-color-primary-lightest: #52525b;
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f9fafb;
+  --ifm-font-color-base: #18181b;
+  --ifm-heading-color: #09090b;
+  --ifm-code-font-size: 95%;
+  --ifm-link-color: #18181b;
+  --ifm-link-hover-color: #52525b;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 0 0 #e4e4e7;
+  --ifm-footer-background-color: #09090b;
+  --ifm-footer-color: #fafafa;
+  --ifm-footer-link-color: #a1a1aa;
+  --ifm-footer-link-hover-color: #ffffff;
+  --ifm-toc-border-color: #e4e4e7;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.06);
+}
+
+/* Dark mode: white on black */
+[data-theme='dark'] {
+  --ifm-color-primary: #fafafa;
+  --ifm-color-primary-dark: #e4e4e7;
+  --ifm-color-primary-darker: #d4d4d8;
+  --ifm-color-primary-darkest: #a1a1aa;
+  --ifm-color-primary-light: #ffffff;
+  --ifm-color-primary-lighter: #ffffff;
+  --ifm-color-primary-lightest: #ffffff;
+  --ifm-background-color: #09090b;
+  --ifm-background-surface-color: #18181b;
+  --ifm-font-color-base: #fafafa;
+  --ifm-heading-color: #ffffff;
+  --ifm-link-color: #fafafa;
+  --ifm-link-hover-color: #a1a1aa;
+  --ifm-navbar-background-color: #09090b;
+  --ifm-navbar-shadow: 0 1px 0 0 #27272a;
+  --ifm-footer-background-color: #000000;
+  --ifm-footer-color: #fafafa;
+  --ifm-footer-link-color: #a1a1aa;
+  --ifm-footer-link-hover-color: #ffffff;
+  --ifm-toc-border-color: #27272a;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* Navbar styling */
+.navbar {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  box-shadow: none;
+}
+
+.navbar__title {
+  font-weight: 700;
+}
+
+/* Sidebar styling */
+.menu__link {
+  font-size: 0.9rem;
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  font-weight: 600;
+}
+
+/* Table styling */
+table {
+  font-size: 0.9rem;
+}
+
+th {
+  font-weight: 600;
+}
+
+/* Code block styling */
+[data-theme='dark'] .prism-code {
+  background-color: #18181b !important;
+}
+
+:root .prism-code {
+  background-color: #f4f4f5 !important;
+}
+
+/* Inline code styling */
+code {
+  border: 1px solid var(--ifm-toc-border-color);
+  background-color: var(--ifm-background-surface-color);
+}
+
+/* Footer styling */
+.footer--dark {
+  --ifm-footer-background-color: #000000;
+}
+
+[data-theme='dark'] .footer--dark {
+  --ifm-footer-background-color: #000000;
+  border-top: 1px solid #27272a;
+}

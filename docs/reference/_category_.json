@@ -1,0 +1,8 @@
+{
+  "label": "Reference",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "Complete API reference and configuration documentation for Toolpack SDK. Covers Toolpack class, CompletionRequest types, events, toolpack.config.json, and environment variables."
+  }
+}

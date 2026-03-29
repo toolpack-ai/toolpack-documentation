@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Build artifacts
+yarn-error.log
+build/
+
+# Environment-specific configs (managed outside repo)
+firebase.json
+.firebaserc
+
+# Local tooling caches
+.DS_Store
+.env
+.docusaurus/
+.firebase/

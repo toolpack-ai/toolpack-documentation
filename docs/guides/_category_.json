@@ -1,0 +1,8 @@
+{
+  "label": "Guides",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "In-depth guides for Toolpack SDK: configure AI providers, create custom modes, build custom provider adapters, use workflows, and run the interactive CLI."
+  }
+}

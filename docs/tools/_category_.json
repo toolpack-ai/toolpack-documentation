@@ -1,0 +1,8 @@
+{
+  "label": "Tools",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "Explore 77 built-in AI tools across 10 categories: filesystem, execution, system, HTTP, web scraping, coding, git, diff, database, and cloud deployment."
+  }
+}
