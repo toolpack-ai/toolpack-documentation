@@ -111,30 +111,19 @@ const config: Config = {
       { name: 'theme-color', content: '#09090b', media: '(prefers-color-scheme: dark)' },
       { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
 
-      // Primary meta tags
-      { name: 'description', content: 'Ship multi-provider AI workflows with one TypeScript SDK: 77 tools, streaming, knowledge search, zero vendor lock-in.' },
+      // Primary meta tags (non-OG — Docusaurus generates og:* and twitter:* per page from frontmatter)
       { name: 'keywords', content: 'Toolpack SDK, AI SDK, TypeScript AI, OpenAI SDK, Anthropic SDK, Gemini SDK, Ollama SDK, LLM framework, AI tools, tool calling, multi-provider AI, AI agent framework, Node.js AI' },
       { name: 'author', content: 'Toolpack AI' },
       { name: 'robots', content: 'index, follow' },
 
-      // Open Graph
-      { property: 'og:type', content: 'website' },
+      // Open Graph — only static tags that Docusaurus doesn't generate per-page
       { property: 'og:site_name', content: 'Toolpack SDK' },
-      { property: 'og:title', content: 'Toolpack SDK – Build AI apps with OpenAI, Anthropic & more' },
-      { property: 'og:description', content: 'Ship multi-provider AI workflows with one TypeScript SDK: 77 tools, streaming, knowledge search, zero vendor lock-in.' },
-      { property: 'og:url', content: 'https://toolpacksdk.com' },
-      { property: 'og:image', content: 'https://toolpacksdk.com/img/og-image.png' },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
-      { property: 'og:image:alt', content: 'Toolpack SDK - The Universal AI SDK' },
       { property: 'og:locale', content: 'en_US' },
 
-      // Twitter Card
+      // Twitter Card type (Docusaurus generates the rest per page)
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:title', content: 'Toolpack SDK – Build AI apps with OpenAI, Anthropic & more' },
-      { name: 'twitter:description', content: 'Ship multi-provider AI workflows with one TypeScript SDK: 77 tools, streaming, knowledge search, zero vendor lock-in.' },
-      { name: 'twitter:image', content: 'https://toolpacksdk.com/img/og-image.png' },
-      { name: 'twitter:image:alt', content: 'Toolpack SDK - The Universal AI SDK' },
     ],
     navbar: {
       title: 'TOOLPACK SDK',
