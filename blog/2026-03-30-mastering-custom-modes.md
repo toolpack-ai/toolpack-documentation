@@ -68,7 +68,7 @@ const reviewerMode = createMode({
   systemPrompt: 'You are an expert security and performance code reviewer. Read the provided files and comment on structural optimizations. Do not attempt to fix the files yourself.',
   
   // We allow tools in the filesystem, network, and source control categories.
-  allowedToolCategories: ['filesystem', 'git'],
+  allowedToolCategories: ['filesystem', 'version-control'],
   
   // But we strictly block the ability to edit or delete any files.
   // Block lists take precedence over allow lists.
