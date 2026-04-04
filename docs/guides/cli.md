@@ -8,18 +8,18 @@ keywords: [Toolpack CLI, AI terminal, interactive AI, CLI tool, AI command line,
 
 The **Toolpack CLI** is a rich interactive terminal interface built with the Toolpack SDK. It demonstrates the SDK's capabilities and can be used as a standalone AI assistant.
 
-[![GitHub](https://img.shields.io/badge/GitHub-toolpack--cli-blue?logo=github)](https://github.com/toolpack-ai/toolpack-cli) [![npm](https://img.shields.io/npm/v/toolpack-cli?logo=npm)](https://www.npmjs.com/package/toolpack-cli)
+[![GitHub](https://img.shields.io/badge/GitHub-toolpack--cli-blue?logo=github)](https://github.com/toolpack-ai/toolpack-cli) [![npm](https://img.shields.io/npm/v/@toolpack-sdk/cli?logo=npm)](https://www.npmjs.com/package/@toolpack-sdk/cli)
 
 ## Installation
 
 ```bash
-npm install -g toolpack-cli
+npm install -g @toolpack-sdk/cli
 ```
 
 Or run directly with npx:
 
 ```bash
-npx toolpack-cli
+npx @toolpack-sdk/cli
 ```
 
 ## Features
@@ -31,7 +31,6 @@ npx toolpack-cli
 - **Conversation History** - Persistent chat history with SQLite
 - **Streaming** - Real-time token streaming with interrupt support
 - **Keyboard Shortcuts** - Efficient navigation and control
-- **Instant Knowledge Cache** - Bundled embeddings copied to `~/.toolpack/knowledge/cli` so global installs skip re-indexing
 
 ## Quick Start
 
@@ -124,8 +123,6 @@ npm run dev
 npm run build
 npm start
 ```
-
-During `npm run build` the CLI copies the bundled knowledge assets (`samples/toolpack-cli/knowledge/cli/*.json`) into `dist/knowledge`. On first run the CLI mirrors them into `~/.toolpack/knowledge/cli`, letting the `PersistentKnowledgeProvider` load cached embeddings immediately. Delete that directory or pass `reSync: true` in `ToolpackContext` if you need to regenerate embeddings after editing the Markdown/JSON/SQLite sources.
 
 ## Architecture
 

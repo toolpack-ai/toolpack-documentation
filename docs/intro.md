@@ -7,7 +7,14 @@ keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, 
 
 # Toolpack SDK
 
-[![GitHub](https://img.shields.io/badge/GitHub-toolpack--sdk-blue?logo=github)](https://github.com/toolpack-ai/toolpack-sdk) [![npm](https://img.shields.io/npm/v/toolpack-sdk?logo=npm)](https://www.npmjs.com/package/toolpack-sdk) [![CLI GitHub](https://img.shields.io/badge/CLI-GitHub-green?logo=github)](https://github.com/toolpack-ai/toolpack-cli) [![CLI npm](https://img.shields.io/npm/v/toolpack-cli?logo=npm&label=CLI)](https://www.npmjs.com/package/toolpack-cli) [![CLI Docs](https://img.shields.io/badge/CLI-Docs-purple)](/guides/cli)
+**Core Packages:**  
+[![SDK GitHub](https://img.shields.io/badge/GitHub-toolpack--sdk-blue?logo=github)](https://github.com/toolpack-ai/toolpack-sdk) [![SDK npm](https://img.shields.io/npm/v/toolpack-sdk?logo=npm&label=SDK)](https://www.npmjs.com/package/toolpack-sdk) [![Knowledge npm](https://img.shields.io/npm/v/@toolpack-sdk/knowledge?logo=npm&label=Knowledge)](https://www.npmjs.com/package/@toolpack-sdk/knowledge)
+
+**CLI:**  
+[![CLI GitHub](https://img.shields.io/badge/GitHub-toolpack--cli-green?logo=github)](https://github.com/toolpack-ai/toolpack-cli) [![CLI npm](https://img.shields.io/npm/v/@toolpack-sdk/cli?logo=npm&label=CLI)](https://www.npmjs.com/package/@toolpack-sdk/cli)
+
+**Organizations:**  
+[![GitHub Org](https://img.shields.io/badge/GitHub-toolpack--ai-black?logo=github)](https://github.com/toolpack-ai) [![npm Org](https://img.shields.io/badge/npm-@toolpack--sdk-orange?logo=npm)](https://www.npmjs.com/org/toolpack-sdk)
 
 <div style={{position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', marginBottom: '24px'}}>
   <iframe
