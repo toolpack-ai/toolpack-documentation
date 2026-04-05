@@ -10,7 +10,7 @@ Modes control what the AI can do. They define which tools are available and shap
 
 ## Built-in Modes
 
-Toolpack SDK includes two built-in modes:
+Toolpack SDK includes three built-in modes:
 
 ### Agent Mode (Default)
 
@@ -21,7 +21,7 @@ toolpack.setMode('agent');
 ```
 
 **Capabilities:**
-- All 77 built-in tools available
+- All 79 built-in tools available
 - File system operations (read, write, delete, search)
 - Command execution (run shell commands, background processes)
 - Web access (search, scrape, HTTP requests)
@@ -30,6 +30,22 @@ toolpack.setMode('agent');
 - Code analysis
 
 **Best for:** Coding assistants, automation agents, DevOps bots, file management
+
+### Coding Mode
+
+Optimized for software development tasks with concise output and minimal conversational text.
+
+```typescript
+toolpack.setMode('coding');
+```
+
+**Capabilities:**
+- All 79 built-in tools available
+- Concise planning and step execution
+- Focused on file operations and code changes
+- Minimal conversational filler
+
+**Best for:** Coding tasks, refactoring, debugging, file manipulation
 
 ### Chat Mode
 

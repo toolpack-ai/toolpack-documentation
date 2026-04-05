@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 slug: /
-description: "Toolpack SDK is a unified TypeScript SDK for building AI-powered applications. Use OpenAI, Anthropic, Gemini, or Ollama with one API. 77 built-in tools, streaming, workflows, and zero vendor lock-in."
+description: "Toolpack SDK is an open source unified TypeScript SDK for building AI-powered applications. Use OpenAI, Anthropic, Gemini, or Ollama with one API. Built-in tools, streaming, workflows, and zero vendor lock-in."
 keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, LLM, tool calling, multi-provider, AI agent, Node.js]
 ---
 
@@ -27,14 +27,14 @@ keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, 
   />
 </div>
 
-The **Toolpack SDK** is a unified TypeScript SDK for building AI-powered applications. It provides a single, consistent API to work with multiple AI providers - OpenAI, Anthropic, Gemini, and Ollama - without vendor lock-in.
+The **Toolpack SDK** is an **open source** unified TypeScript SDK for building AI-powered applications. It provides a single, consistent API to work with multiple AI providers - OpenAI, Anthropic, Gemini, and Ollama - without vendor lock-in.
 
 ## Why Toolpack SDK?
 
 - **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, or Ollama with a single line of code
-- **77 Built-in Tools** - File system, command execution, web scraping, database operations, and more
+- **79 Built-in Tools** - File system, command execution, web scraping, database operations, and more
 - **No Subscription Required** - Use your own API keys directly with providers
-- **Two Built-in Modes** - Agent mode (full tool access) and Chat mode (web-only access)
+- **Three Built-in Modes** - Agent mode (full tool access), Coding mode (development-focused), and Chat mode (web-only access)
 - **Workflow Engine** - Automatic planning and step-by-step execution for complex tasks
 - **Fully Extensible** - Create custom providers, modes, and tools
 
@@ -65,8 +65,8 @@ for await (const chunk of stream) {
 | Feature | Description |
 |---------|-------------|
 | **Providers** | OpenAI, Anthropic, Gemini, Ollama + custom providers |
-| **Tools** | 77 built-in tools across 10 categories |
-| **Modes** | Agent (full access), Chat (web-only), or custom |
+| **Tools** | 79 built-in tools across 10 categories |
+| **Modes** | Agent (full access), Coding (development-focused), Chat (web-only), or custom |
 | **Workflows** | Direct execution or planned step-by-step |
 | **Streaming** | Real-time token streaming with tool execution |
 | **Multimodal** | Text + image inputs across all vision-capable providers |

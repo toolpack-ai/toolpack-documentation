@@ -26,7 +26,7 @@ npx @toolpack-sdk/cli
 
 - **Multiple AI Providers** - Switch between OpenAI, Anthropic, Gemini, and Ollama
 - **Model Selection** - Choose from available models per provider
-- **Tool Execution** - Watch the AI use 77 built-in tools in real-time
+- **Tool Execution** - Watch the AI use 79 built-in tools in real-time
 - **Mode Switching** - Toggle between Agent and Chat modes
 - **Conversation History** - Persistent chat history with SQLite
 - **Streaming** - Real-time token streaming with interrupt support

@@ -135,7 +135,7 @@ const customMode: ModeConfig = {
             reportPercentage: true,
         },
         onFailure: {
-            strategy: 'ask_user',  // 'abort' | 'skip' | 'ask_user' | 'try_alternative'
+            strategy: 'ask_user',  // 'abort' | 'skip' | 'ask_user'
         },
     },
 };
@@ -174,7 +174,6 @@ const customMode: ModeConfig = {
 | `abort` | Stop execution immediately |
 | `skip` | Skip the failed step and continue |
 | `ask_user` | Pause and wait for user decision |
-| `try_alternative` | Let AI try a different approach |
 
 ## Accessing the Workflow Executor
 

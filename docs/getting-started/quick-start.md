@@ -64,7 +64,7 @@ When `tools: true` is set, the AI can automatically use built-in tools to accomp
 ```typescript
 const toolpack = await Toolpack.init({
     provider: 'openai',
-    tools: true,  // Enable 77 built-in tools
+    tools: true,  // Enable 79 built-in tools
 });
 
 // The AI will automatically use fs.list_dir to answer this
