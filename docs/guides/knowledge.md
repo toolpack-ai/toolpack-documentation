@@ -1,7 +1,7 @@
 ---
 sidebar_position: 8
-description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, and SQLite sources with vector embeddings."
-keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, OpenAI embedder, Ollama embedder]
+description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, and SQLite sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, and streaming ingestion."
+keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, WebUrlSource, ApiSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder]
 ---
 
 # Knowledge Package
@@ -121,6 +121,72 @@ const source = new MarkdownSource('./docs/**/*.md', {
 - Code block detection (`hasCode: true` metadata)
 - Deterministic chunk IDs for deduplication
 
+### WebUrlSource
+
+Crawl and index websites automatically:
+
+```typescript
+import { WebUrlSource } from '@toolpack-sdk/knowledge';
+
+const source = new WebUrlSource('https://example.com/docs', {
+  maxDepth: 3,                    // Crawl up to 3 levels deep
+  maxPages: 100,                  // Limit to 100 pages
+  allowedDomains: ['example.com'], // Only crawl these domains
+  delayMs: 1000,                  // Respectful crawling delay
+  userAgent: 'MyApp/1.0',         // Custom user agent
+  blockedPaths: ['/admin', '/private'], // Skip these paths
+  followExternalLinks: false,     // Stay within allowed domains
+});
+```
+
+**Features:**
+- Recursive website crawling with depth control
+- Domain and path filtering
+- Content extraction (removes scripts, styles, navigation)
+- Link discovery and following
+- Rate limiting and respectful crawling
+- Metadata preservation (title, URL, crawl date, links)
+
+### ApiSource
+
+Index data from REST APIs with pagination support:
+
+```typescript
+import { ApiSource } from '@toolpack-sdk/knowledge';
+
+const source = new ApiSource('https://api.example.com', '/posts', {
+  method: 'GET',                  // HTTP method
+  headers: { 'Accept': 'application/json' },
+  auth: {
+    type: 'bearer',              // 'bearer' | 'basic' | 'api-key'
+    token: process.env.API_TOKEN,
+  },
+  pagination: {
+    type: 'cursor',              // 'offset' | 'cursor' | 'page'
+    cursorParam: 'after',
+    nextCursorPath: 'data.next_cursor',
+    resultsPath: 'data.posts',
+  },
+  rateLimit: {
+    requestsPerSecond: 2,        // Rate limiting
+  },
+  transformResponse: (data, url) => {
+    return data.posts.map((post: any) => ({
+      content: `${post.title}\n\n${post.content}`,
+      metadata: { id: post.id, author: post.author, tags: post.tags },
+    }));
+  },
+});
+```
+
+**Features:**
+- REST API data ingestion with authentication
+- Multiple pagination strategies (offset, cursor, page-based)
+- Rate limiting and request throttling
+- Custom response transformation
+- Error handling and retries
+- Support for all HTTP methods
+
 ## Embedders
 
 Embedders convert text to vector embeddings for semantic search:
@@ -191,16 +257,67 @@ const toolpack = await Toolpack.init({
 const response = await toolpack.chat('How do I configure authentication?');
 ```
 
+### Enhanced Knowledge Tools
+
+The knowledge base provides a tool with advanced search capabilities:
+
+```typescript
+const tool = kb.toTool();
+
+// Semantic search (default)
+const semanticResults = await tool.execute({
+  query: 'machine learning',
+  limit: 5,
+});
+
+// Hybrid search (semantic + keyword)
+const hybridResults = await tool.execute({
+  query: 'machine learning algorithms',
+  searchType: 'hybrid',
+  keywordWeight: 0.4,
+  semanticWeight: 0.6,
+  filter: { category: 'tutorial' },
+});
+```
+
+**Tool parameters:**
+- `query`: Search query string
+- `searchType`: `'semantic'` or `'hybrid'` (default: `'semantic'`)
+- `keywordWeight`: Weight for keyword matching (0-1, default: 0.3)
+- `semanticWeight`: Weight for semantic matching (0-1, default: 0.7)
+- `limit`: Maximum results (default: 10)
+- `threshold`: Minimum similarity score (default: 0.7)
+- `filter`: Metadata filters
+
 ## Querying
 
-### Basic Search
+### Basic Semantic Search
 
 ```typescript
 const results = await kb.query('authentication setup');
 // Returns: Array of { chunk, score, distance }
 ```
 
-### Advanced Options
+### Hybrid Search (Semantic + Keyword)
+
+Combine semantic similarity with keyword matching for better results:
+
+```typescript
+const results = await kb.hybridQuery('machine learning algorithms', {
+  keywordWeight: 0.3,        // 30% keyword relevance
+  semanticWeight: 0.7,       // 70% semantic relevance
+  keywordFields: ['content', 'title'], // Fields to search
+  limit: 10,
+  threshold: 0.7,
+});
+```
+
+**Hybrid search advantages:**
+- Better precision for technical terms and proper nouns
+- Improved ranking for exact matches
+- Balanced semantic understanding with keyword accuracy
+
+### Advanced Query Options
 
 ```typescript
 const results = await kb.query('authentication setup', {
@@ -209,6 +326,7 @@ const results = await kb.query('authentication setup', {
   filter: {              // Metadata filters
     hasCode: true,
     category: { $in: ['api', 'guide'] },
+    source: 'web',       // Filter by source type
   },
   includeMetadata: true,  // Include chunk metadata (default: true)
   includeVectors: false,  // Include embedding vectors (default: false)
@@ -227,7 +345,45 @@ const results = await kb.query('authentication setup', {
 // Numeric comparisons
 { priority: { $gt: 5 } }
 { priority: { $lt: 10 } }
+
+// Source-specific filters
+{ source: 'web', url: { $in: ['https://docs.example.com'] } }
+{ source: 'api', statusCode: 200 }
 ```
+
+## Streaming Ingestion
+
+Process large datasets with real-time progress tracking:
+
+```typescript
+// Traditional sync (blocks until complete)
+await kb.sync();
+
+// Streaming sync (progress updates)
+for await (const progress of kb.syncStream()) {
+  switch (progress.type) {
+    case 'count':
+      console.log(`📊 Total chunks to process: ${progress.total}`);
+      break;
+    case 'progress':
+      console.log(`⏳ Processed ${progress.processed}/${progress.total} chunks (${progress.percent}%)`);
+      break;
+    case 'complete':
+      console.log(`✅ Sync complete! Processed ${progress.total} chunks`);
+      break;
+    case 'error':
+      console.error('❌ Sync failed:', progress.error);
+      break;
+  }
+}
+```
+
+**Streaming benefits:**
+- Real-time progress feedback
+- Memory-efficient batch processing (100 chunks per batch)
+- Non-blocking UI updates
+- Early error detection
+- Better user experience for large datasets
 
 ## Error Handling
 
@@ -275,6 +431,57 @@ interface KnowledgeOptions {
 }
 ```
 
+### Knowledge Methods
+
+#### query(text, options?)
+Standard semantic search using vector similarity.
+
+```typescript
+async query(text: string, options?: QueryOptions): Promise<QueryResult[]>
+```
+
+#### hybridQuery(text, options?)
+Advanced search combining semantic similarity with keyword matching.
+
+```typescript
+async hybridQuery(text: string, options?: HybridQueryOptions): Promise<QueryResult[]>
+
+interface HybridQueryOptions extends QueryOptions {
+  keywordWeight?: number;     // Weight for keyword matching (default: 0.3)
+  semanticWeight?: number;    // Weight for semantic matching (default: 0.7)
+  keywordFields?: string[];   // Fields to search (default: ['content'])
+}
+```
+
+#### sync()
+Synchronous ingestion of all sources.
+
+```typescript
+async sync(): Promise<void>
+```
+
+#### syncStream()
+Streaming ingestion with progress updates.
+
+```typescript
+async *syncStream(): AsyncIterable<SyncProgress>
+
+interface SyncProgress {
+  type: 'count' | 'progress' | 'complete' | 'error';
+  total?: number;
+  processed?: number;
+  percent?: number;
+  error?: Error;
+}
+```
+
+#### toTool()
+Convert knowledge base to a Toolpack SDK tool.
+
+```typescript
+toTool(): KnowledgeTool
+```
+
 ### Sync Events
 
 ```typescript
@@ -307,6 +514,8 @@ onEmbeddingProgress: (event) => {
    - Small docs: 1000-1500 tokens
    - Large docs: 2000-3000 tokens
    - Code: 1500-2000 tokens (with `hasCode` metadata)
+   - Web content: 1500-2000 tokens (after HTML cleaning)
+   - API data: 1000-1500 tokens (depends on content structure)
 
 3. **Handle embedding failures:**
    - Always provide `onError` for production
@@ -315,11 +524,31 @@ onEmbeddingProgress: (event) => {
 
 4. **Leverage metadata filtering:**
    - Tag chunks with `category`, `hasCode`, `version`
+   - Use source-specific metadata (`source`, `url`, `statusCode`)
    - Filter by relevance in queries
 
 5. **Monitor progress:**
    - Use `onEmbeddingProgress` for large knowledge bases
+   - Use `syncStream()` for real-time progress in UIs
    - Show loading indicators in CLI apps
+
+6. **Web crawling best practices:**
+   - Set appropriate `delayMs` (1000ms+ for respectful crawling)
+   - Use `allowedDomains` to stay within your site
+   - Limit `maxDepth` and `maxPages` to avoid excessive crawling
+   - Check `robots.txt` compliance manually
+
+7. **API data ingestion:**
+   - Implement rate limiting to respect API limits
+   - Use `transformResponse` for complex data structures
+   - Handle pagination correctly for large datasets
+   - Cache API responses when possible
+
+8. **Hybrid search optimization:**
+   - Use hybrid search for technical content with proper nouns
+   - Adjust `keywordWeight` higher for exact term matching
+   - Use `semanticWeight` higher for conceptual searches
+   - Experiment with `keywordFields` for different content types
 
 ## Troubleshooting
 
@@ -344,4 +573,48 @@ new MarkdownSource('.\\docs\\**\\*.md')  // ✗
 // Use embedBatch() when possible
 // OllamaEmbedder.embedBatch is optimized
 // OpenAIEmbedder.embedBatch makes single API call
+```
+
+**Web crawling blocked:**
+```typescript
+// Check robots.txt and respect site policies
+// Add user agent and delay between requests
+// Use allowedDomains to limit crawling scope
+const source = new WebUrlSource(url, {
+  userAgent: 'MyApp/1.0 (contact@example.com)',
+  delayMs: 2000,
+  allowedDomains: ['example.com'],
+});
+```
+
+**API rate limiting:**
+```typescript
+// Implement rate limiting in ApiSource
+const source = new ApiSource(baseUrl, endpoint, {
+  rateLimit: {
+    requestsPerSecond: 1,
+    requestsPerMinute: 60,
+  },
+});
+```
+
+**Hybrid search not returning expected results:**
+```typescript
+// Adjust weights based on content type
+// Technical docs: higher keywordWeight
+// General content: higher semanticWeight
+const results = await kb.hybridQuery(query, {
+  keywordWeight: 0.4,    // Increase for technical terms
+  semanticWeight: 0.6,   // Increase for concepts
+  keywordFields: ['content', 'title', 'metadata.tags'],
+});
+```
+
+**Streaming sync memory issues:**
+```typescript
+// Streaming processes in batches automatically
+// For very large datasets, consider:
+// - Smaller batch sizes (not currently configurable)
+// - More frequent progress updates
+// - Error handling for partial failures
 ```

@@ -160,7 +160,7 @@ The tool definition, execution logic, and workflow stay identical.
 
 We're building Toolpack SDK in the open. Here's what's on the roadmap:
 
-- **Knowledge Module (RAG)**: Already shipped—embed and search documents with built-in vector storage.
+- **Knowledge Module (RAG)**: ✅ Enhanced with web crawling, API data ingestion, hybrid search, and streaming ingestion.
 - **MCP Integration**: Connect to Model Context Protocol servers for extended tool ecosystems.
 - **Enhanced Workflows**: More sophisticated planning, branching, and error recovery.
 - **Community Tools**: A registry of reusable tools contributed by the community.
