@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
         'guides/knowledge',
         'guides/multimodal',
         'guides/cli',
+        'guides/hitl-confirmation',
       ],
     },
     {
