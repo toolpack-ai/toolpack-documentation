@@ -74,7 +74,7 @@ If you see a response from the AI, you're ready to go!
 
 - [Quick Start](/getting-started/quick-start) - Build your first AI application
 - [Providers](/guides/providers) - Learn about supported AI providers
-- [Tools](/tools/overview) - Explore the 79 built-in tools
+- [Tools](/tools/overview) - Explore the 90 built-in tools
 
 ## Source Code
 
