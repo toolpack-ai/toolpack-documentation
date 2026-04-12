@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-description: "Explore the built-in tools in Toolpack SDK across 10 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, and cloud deployment."
-keywords: [AI tools, built-in tools, tool calling, LLM tools, filesystem tools, HTTP tools, database tools, git tools, Toolpack SDK tools]
+description: "Explore the built-in tools in Toolpack SDK across 11 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, cloud deployment, and Kubernetes."
+keywords: [AI tools, built-in tools, tool calling, LLM tools, filesystem tools, HTTP tools, database tools, git tools, Kubernetes tools, Toolpack SDK tools]
 ---
 
 # Tools Overview
 
-Toolpack SDK includes **built-in tools** across 10 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
+Toolpack SDK includes **built-in tools** across 11 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
 
 ## Enabling Tools
 
@@ -31,6 +31,7 @@ const toolpack = await Toolpack.init({
 | [Diff](/tools/diff) | 3 | Create and apply patches |
 | [Database](/tools/database) | 7 | SQL queries and database operations |
 | [Cloud](/tools/cloud) | 3 | Deploy to cloud platforms |
+| [Kubernetes](/tools/kubernetes) | 11 | Inspect and manage Kubernetes clusters with kubectl tools |
 
 ## How Tools Work
 

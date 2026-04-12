@@ -21,7 +21,7 @@ toolpack.setMode('agent');
 ```
 
 **Capabilities:**
-- All 79 built-in tools available
+- All 90 built-in tools available
 - File system operations (read, write, delete, search)
 - Command execution (run shell commands, background processes)
 - Web access (search, scrape, HTTP requests)
@@ -40,7 +40,7 @@ toolpack.setMode('coding');
 ```
 
 **Capabilities:**
-- All 79 built-in tools available
+- All 90 built-in tools available
 - Concise planning and step execution
 - Focused on file operations and code changes
 - Minimal conversational filler

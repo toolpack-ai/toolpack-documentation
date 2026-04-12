@@ -32,7 +32,7 @@ The **Toolpack SDK** is an **open source** unified TypeScript SDK for building A
 ## Why Toolpack SDK?
 
 - **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, or Ollama with a single line of code
-- **79 Built-in Tools** - File system, command execution, web scraping, database operations, and more
+- **90 Built-in Tools** - File system, Kubernetes, command execution, web scraping, database operations, and more
 - **No Subscription Required** - Use your own API keys directly with providers
 - **Three Built-in Modes** - Agent mode (full tool access), Coding mode (development-focused), and Chat mode (web-only access)
 - **Workflow Engine** - Automatic planning and step-by-step execution for complex tasks
@@ -65,7 +65,7 @@ for await (const chunk of stream) {
 | Feature | Description |
 |---------|-------------|
 | **Providers** | OpenAI, Anthropic, Gemini, Ollama + custom providers |
-| **Tools** | 79 built-in tools across 10 categories |
+| **Tools** | 90 built-in tools across 11 categories |
 | **Modes** | Agent (full access), Coding (development-focused), Chat (web-only), or custom |
 | **Workflows** | Direct execution or planned step-by-step |
 | **Streaming** | Real-time token streaming with tool execution |
