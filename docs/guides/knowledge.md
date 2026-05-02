@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 1
 description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, and SQLite sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, and streaming ingestion."
 keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, WebUrlSource, ApiSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder]
 ---

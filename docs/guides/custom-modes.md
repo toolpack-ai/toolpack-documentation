@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 5
 description: "Create custom AI modes in Toolpack SDK. Define tool access patterns, blocked categories, system prompts, and workflow configuration for specialized AI behavior."
 keywords: [custom AI modes, tool access control, mode configuration, Toolpack SDK custom mode, createMode, AI behavior control]
 ---

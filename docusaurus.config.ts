@@ -34,7 +34,7 @@ const config: Config = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareSourceCode',
         name: 'Toolpack SDK',
-        description: 'A unified TypeScript SDK for building AI-powered applications with OpenAI, Anthropic, Gemini, and Ollama. 77 built-in tools, multi-provider support, and zero vendor lock-in.',
+        description: 'A unified TypeScript SDK for building AI-powered applications with OpenAI, Anthropic, Gemini, and Ollama. 97 built-in tools, multi-provider support, and zero vendor lock-in.',
         url: 'https://toolpacksdk.com',
         codeRepository: 'https://github.com/toolpack-ai/toolpack-sdk',
         programmingLanguage: 'TypeScript',

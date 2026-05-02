@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 3
 description: "Learn about Toolpack SDK workflows. Use direct execution for simple tasks or planned workflows for complex multi-step AI operations with progress tracking."
 keywords: [AI workflows, planned execution, step-by-step AI, workflow engine, AI task planning, Toolpack SDK workflows]
 ---

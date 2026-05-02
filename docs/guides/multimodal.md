@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 8
 description: "Send images to AI models with Toolpack SDK. Support for file paths, base64 data, and URLs across OpenAI, Anthropic, Gemini, and Ollama."
 keywords: [multimodal AI, vision AI, image input, GPT-4 vision, Claude vision, Gemini vision, Toolpack SDK multimodal]
 ---

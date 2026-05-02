@@ -8,7 +8,7 @@ keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, 
 # Toolpack SDK
 
 **Core Packages:**  
-[![SDK GitHub](https://img.shields.io/badge/GitHub-toolpack--sdk-blue?logo=github)](https://github.com/toolpack-ai/toolpack-sdk) [![SDK npm](https://img.shields.io/npm/v/toolpack-sdk?logo=npm&label=SDK)](https://www.npmjs.com/package/toolpack-sdk) [![Knowledge npm](https://img.shields.io/npm/v/@toolpack-sdk/knowledge?logo=npm&label=Knowledge)](https://www.npmjs.com/package/@toolpack-sdk/knowledge)
+[![SDK GitHub](https://img.shields.io/badge/GitHub-toolpack--sdk-blue?logo=github)](https://github.com/toolpack-ai/toolpack-sdk) [![SDK npm](https://img.shields.io/npm/v/toolpack-sdk?logo=npm&label=SDK)](https://www.npmjs.com/package/toolpack-sdk) [![Knowledge npm](https://img.shields.io/npm/v/@toolpack-sdk/knowledge?logo=npm&label=Knowledge)](https://www.npmjs.com/package/@toolpack-sdk/knowledge) [![Agents npm](https://img.shields.io/npm/v/@toolpack-sdk/agents/alpha?logo=npm&label=Agents%20(alpha))](https://www.npmjs.com/package/@toolpack-sdk/agents)
 
 **CLI:**  
 [![CLI GitHub](https://img.shields.io/badge/GitHub-toolpack--cli-green?logo=github)](https://github.com/toolpack-ai/toolpack-cli) [![CLI npm](https://img.shields.io/npm/v/@toolpack-sdk/cli?logo=npm&label=CLI)](https://www.npmjs.com/package/@toolpack-sdk/cli)
@@ -32,10 +32,11 @@ The **Toolpack SDK** is an **open source** unified TypeScript SDK for building A
 ## Why Toolpack SDK?
 
 - **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, or Ollama with a single line of code
-- **90 Built-in Tools** - File system, Kubernetes, command execution, web scraping, database operations, and more
+- **97 Built-in Tools** - File system, Kubernetes, command execution, web scraping, database operations, and more
 - **No Subscription Required** - Use your own API keys directly with providers
 - **Three Built-in Modes** - Agent mode (full tool access), Coding mode (development-focused), and Chat mode (web-only access)
 - **Workflow Engine** - Automatic planning and step-by-step execution for complex tasks
+- **Agents Package** *(alpha)* - Build production-ready AI agents with channels, interceptors, and multi-agent coordination
 - **Fully Extensible** - Create custom providers, modes, and tools
 
 ## Quick Example
@@ -65,7 +66,7 @@ for await (const chunk of stream) {
 | Feature | Description |
 |---------|-------------|
 | **Providers** | OpenAI, Anthropic, Gemini, Ollama + custom providers |
-| **Tools** | 90 built-in tools across 11 categories |
+| **Tools** | 97 built-in tools across 12 categories |
 | **Modes** | Agent (full access), Coding (development-focused), Chat (web-only), or custom |
 | **Workflows** | Direct execution or planned step-by-step |
 | **Streaming** | Real-time token streaming with tool execution |

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 1
 description: "Use the Toolpack CLI for an interactive AI terminal experience. Features multi-provider support, tool execution, mode switching, and rich terminal UI."
 keywords: [Toolpack CLI, AI terminal, interactive AI, CLI tool, AI command line, terminal assistant, AI REPL]
 ---

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 11
 description: "Integrate Model Context Protocol (MCP) servers with Toolpack SDK to extend AI capabilities with external tools and services."
 keywords: [MCP server, Model Context Protocol, tool integration, external tools, Toolpack SDK MCP, MCP tools]
 ---

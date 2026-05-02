@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
-description: "Configure AI providers in Toolpack SDK. Use OpenAI, Anthropic, Gemini, or Ollama with multi-provider support, custom base URLs, and API key management."
-keywords: [AI providers, OpenAI provider, Anthropic provider, Gemini provider, Ollama local AI, multi-provider SDK, LLM configuration]
+description: "Configure AI providers in Toolpack SDK. Use OpenAI, Anthropic, Gemini, Ollama, or OpenRouter with multi-provider support, custom base URLs, and API key management."
+keywords: [AI providers, OpenAI provider, Anthropic provider, Gemini provider, Ollama local AI, OpenRouter provider, multi-provider SDK, LLM configuration]
 ---
 
 # Providers
@@ -14,8 +14,9 @@ Toolpack SDK supports multiple AI providers out of the box. You use your own API
 |----------|--------|---------------------|
 | **OpenAI** | GPT-4o, o1, o3, and more | `OPENAI_API_KEY` |
 | **Anthropic** | Claude Sonnet, Haiku, Opus, and more | `ANTHROPIC_API_KEY` |
-| **Gemini** | Gemini Flash, Pro, and more | `GEMINI_API_KEY` |
+| **Gemini** | Gemini Flash, Pro, and more | `GOOGLE_GENERATIVE_AI_KEY` |
 | **Ollama** | Any locally installed model | None (local) |
+| **OpenRouter** | 300+ models (auto-discovered) | `OPENROUTER_API_KEY` |
 
 ## Single Provider Setup
 
@@ -33,7 +34,8 @@ const toolpack = await Toolpack.init({
 The SDK automatically reads API keys from environment variables:
 - `OPENAI_API_KEY` or `TOOLPACK_OPENAI_KEY`
 - `ANTHROPIC_API_KEY` or `TOOLPACK_ANTHROPIC_KEY`
-- `GEMINI_API_KEY` or `TOOLPACK_GEMINI_KEY`
+- `GOOGLE_GENERATIVE_AI_KEY` or `TOOLPACK_GEMINI_KEY`
+- `OPENROUTER_API_KEY` or `TOOLPACK_OPENROUTER_KEY`
 
 Or pass the key directly:
 
@@ -58,7 +60,7 @@ const toolpack = await Toolpack.init({
             /* Optional - apiKey: process.env.ANTHROPIC_API_KEY, */
         },
         gemini: {
-            /* Optional - apiKey: process.env.GEMINI_API_KEY, */
+            /* Optional - apiKey: process.env.GOOGLE_GENERATIVE_AI_KEY, */
         },
     },
     defaultProvider: 'openai',
@@ -145,6 +147,52 @@ for (const provider of providers) {
 const models = await toolpack.listModels();
 console.log(models);
 ```
+
+## OpenRouter
+
+[OpenRouter](https://openrouter.ai) gives you access to 300+ models from providers like OpenAI, Anthropic, Google, Meta, and more — all through a single OpenAI-compatible API.
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'openrouter',
+    // Reads OPENROUTER_API_KEY from env, or pass directly:
+    // apiKey: 'sk-or-...',
+});
+
+// OpenRouter auto-discovers all available models
+const models = await toolpack.listModels();
+
+// Use any model by its OpenRouter ID
+const response = await toolpack.generate({
+    model: 'anthropic/claude-sonnet-4',
+    messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+### With attribution options
+
+```typescript
+const toolpack = await Toolpack.init({
+    providers: {
+        openrouter: {
+            apiKey: process.env.OPENROUTER_API_KEY,
+            siteUrl: 'https://your-app.com',   // Optional: for OpenRouter leaderboard
+            siteName: 'Your App Name',          // Optional: for OpenRouter leaderboard
+        },
+    },
+});
+```
+
+### Capability notes
+
+| Feature | Support |
+|---------|---------|
+| Chat completions | ✅ |
+| Streaming | ✅ |
+| Tool/function calling | ✅ |
+| Embeddings | ❌ |
+| Vision | ✅ (model-dependent) |
+| Model discovery | Dynamic (via `/models` endpoint) |
 
 ## Custom Providers
 
