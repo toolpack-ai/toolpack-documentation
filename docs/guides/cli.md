@@ -4,6 +4,10 @@ description: "Use the Toolpack CLI for an interactive AI terminal experience. Fe
 keywords: [Toolpack CLI, AI terminal, interactive AI, CLI tool, AI command line, terminal assistant, AI REPL]
 ---
 
+:::warning Deprecated
+The Toolpack CLI is no longer maintained. A replacement is coming — stay tuned at [toolpacksdk.com](https://toolpacksdk.com).
+:::
+
 # Toolpack CLI
 
 The **Toolpack CLI** is a rich interactive terminal interface built with the Toolpack SDK. It demonstrates the SDK's capabilities and can be used as a standalone AI assistant.

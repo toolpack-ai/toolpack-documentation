@@ -213,6 +213,82 @@ Override system prompts for specific modes:
 | `TOOLPACK_SDK_LOG_LEVEL` | Log level override (`error`, `warn`, `info`, `debug`, `trace`) |
 | `NETLIFY_AUTH_TOKEN` | Netlify deployment token |
 
+## Context Window Management
+
+The `contextWindow` init option controls automatic conversation pruning and summarization. When the accumulated message history approaches the model's context limit, the SDK either prunes old messages or summarizes them before the next request.
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'openai',
+    contextWindow: {
+        enabled: true,                  // default: true
+        strategy: 'prune',              // 'prune' | 'summarize' | 'fail'
+        pruneThreshold: 85,             // trigger at 85% of context window
+        maxMessageHistoryLength: 100,   // optional hard cap on message count
+        summarizerModel: 'gpt-4.1-mini', // only used when strategy = 'summarize'
+        retainSystemMessages: true,     // never prune system messages (default: true)
+        outputTokenBuffer: 1.15,        // 15% safety buffer above maxOutputTokens
+    },
+});
+```
+
+### ContextWindowConfig fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | `true` | Master switch for context window management |
+| `strategy` | `'prune' \| 'summarize' \| 'fail'` | `'prune'` | What to do when the threshold is reached |
+| `pruneThreshold` | number | `85` | Percentage of the context window that triggers cleanup |
+| `maxMessageHistoryLength` | number | — | Optional cap on total message count, independent of token counting |
+| `summarizerModel` | string | *(current model)* | Model to use for summarization — set to a faster/cheaper model to reduce cost |
+| `retainSystemMessages` | boolean | `true` | Whether system messages are exempt from pruning |
+| `outputTokenBuffer` | number | `1.15` | Safety multiplier applied to `maxOutputTokens` before computing available input space |
+
+**Strategies:**
+- `'prune'` — removes the oldest non-system messages until the history fits.
+- `'summarize'` — calls the LLM to produce a summary of removed messages and inserts it as a system message before continuing.
+- `'fail'` — throws an error instead of modifying the history.
+
+---
+
+## maxToolRounds in AgentRunOptions
+
+`AgentRunOptions.maxToolRounds` sets a per-run hard cap on the number of tool-call rounds the agent may execute. It overrides the `tools.maxToolRounds` value in `toolpack.config.json` and bypasses the query-classifier adjustment for that specific run.
+
+```typescript
+// In your BaseAgent subclass:
+const result = await this.run(prompt, {
+    maxToolRounds: 1,   // single-shot: the LLM may call at most one tool round
+});
+```
+
+```typescript
+interface AgentRunOptions {
+    /** One-off workflow override for this specific run */
+    workflow?: Record<string, unknown>;
+
+    /**
+     * Hard cap on tool-call rounds for this specific run.
+     * Overrides ToolsConfig.maxToolRounds and bypasses the query-classifier
+     * adjustment. Use for agents that should only make one tool call per
+     * invocation (e.g. single-shot routers using delegate_to_agent).
+     */
+    maxToolRounds?: number;
+}
+```
+
+`maxToolRounds` can also be set at the `CompletionRequest` level when calling `toolpack.generate()` directly:
+
+```typescript
+await toolpack.generate({
+    messages: [{ role: 'user', content: 'Which agent should handle this?' }],
+    model: 'gpt-4o',
+    maxToolRounds: 1,
+});
+```
+
+---
+
 ## Programmatic Configuration
 
 All options can also be set programmatically:

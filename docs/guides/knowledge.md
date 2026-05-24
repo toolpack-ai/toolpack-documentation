@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
-description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, and SQLite sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, and streaming ingestion."
-keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, WebUrlSource, ApiSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder]
+description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, SQLite, PostgreSQL, and web sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, and streaming ingestion."
+keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, WebUrlSource, ApiDataSource, JSONSource, SQLiteSource, PostgresSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder, VertexAI embedder, OpenRouter embedder]
 ---
 
 # Knowledge Package
@@ -128,64 +128,182 @@ Crawl and index websites automatically:
 ```typescript
 import { WebUrlSource } from '@toolpack-sdk/knowledge';
 
-const source = new WebUrlSource('https://example.com/docs', {
-  maxDepth: 3,                    // Crawl up to 3 levels deep
-  maxPages: 100,                  // Limit to 100 pages
-  allowedDomains: ['example.com'], // Only crawl these domains
-  delayMs: 1000,                  // Respectful crawling delay
-  userAgent: 'MyApp/1.0',         // Custom user agent
-  blockedPaths: ['/admin', '/private'], // Skip these paths
-  followExternalLinks: false,     // Stay within allowed domains
+const source = new WebUrlSource(['https://example.com/docs'], {
+  maxDepth: 2,                 // Follow links up to this many levels (default: 1)
+  maxPagesPerDomain: 20,       // Cap pages crawled per domain (default: 10)
+  sameDomainOnly: true,        // Only follow links on the same domain (default: true)
+  delayMs: 1000,               // Delay between requests in ms (default: 1000)
+  userAgent: 'MyApp/1.0',      // Custom user agent
+  timeoutMs: 30000,            // Request timeout in ms (default: 30000)
+  maxChunkSize: 2000,          // Max tokens per chunk (default: 2000)
+  chunkOverlap: 200,           // Overlap between chunks (default: 200)
+  minChunkSize: 100,           // Min chunk size (default: 100)
+  namespace: 'web',            // Chunk ID prefix (default: 'web')
+  metadata: { source: 'web' }, // Added to all chunks
 });
 ```
 
+**Constructor:** `new WebUrlSource(urls: string[], options?: WebUrlSourceOptions)`
+
 **Features:**
 - Recursive website crawling with depth control
-- Domain and path filtering
-- Content extraction (removes scripts, styles, navigation)
+- Automatic HTML text extraction (removes scripts, styles, nav, header, footer)
 - Link discovery and following
-- Rate limiting and respectful crawling
-- Metadata preservation (title, URL, crawl date, links)
+- Per-domain rate limiting and page caps
+- Metadata includes title, URL, chunk index
 
-### ApiSource
+### ApiDataSource
 
 Index data from REST APIs with pagination support:
 
 ```typescript
-import { ApiSource } from '@toolpack-sdk/knowledge';
+import { ApiDataSource } from '@toolpack-sdk/knowledge';
 
-const source = new ApiSource('https://api.example.com', '/posts', {
-  method: 'GET',                  // HTTP method
-  headers: { 'Accept': 'application/json' },
-  auth: {
-    type: 'bearer',              // 'bearer' | 'basic' | 'api-key'
-    token: process.env.API_TOKEN,
+const source = new ApiDataSource('https://api.github.com/repos/org/repo/issues', {
+  method: 'GET',                        // 'GET' | 'POST' (default: 'GET')
+  headers: {
+    'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+    'Accept': 'application/vnd.github.v3+json',
   },
+  body: undefined,                      // Request body for POST requests
   pagination: {
-    type: 'cursor',              // 'offset' | 'cursor' | 'page'
-    cursorParam: 'after',
-    nextCursorPath: 'data.next_cursor',
-    resultsPath: 'data.posts',
+    param: 'page',                      // Query parameter name for the page number
+    start: 1,                           // Starting page number
+    step: 1,                            // Page increment per request
+    maxPages: 5,                        // Max pages to fetch
   },
-  rateLimit: {
-    requestsPerSecond: 2,        // Rate limiting
-  },
-  transformResponse: (data, url) => {
-    return data.posts.map((post: any) => ({
-      content: `${post.title}\n\n${post.content}`,
-      metadata: { id: post.id, author: post.author, tags: post.tags },
-    }));
+  dataPath: '',                         // Dot-separated JSON path to data array (e.g. 'data.items')
+  contentExtractor: (item: any) =>      // Custom content extraction (optional)
+    `${item.title}\n\n${item.body}`,
+  metadataExtractor: (item: any) => ({  // Custom metadata extraction (optional)
+    id: item.id,
+    state: item.state,
+  }),
+  timeoutMs: 30000,                     // Request timeout in ms (default: 30000)
+  maxChunkSize: 2000,                   // Max tokens per chunk (default: 2000)
+  chunkOverlap: 200,                    // Overlap between chunks (default: 200)
+  namespace: 'api',                     // Chunk ID prefix (default: 'api')
+  metadata: { source: 'github' },       // Added to all chunks
+});
+```
+
+**Constructor:** `new ApiDataSource(url: string, options?: ApiDataSourceOptions)`
+
+When no `contentExtractor` is provided, the source automatically looks for common fields (`content`, `text`, `description`, `body`, `message`) in each item and falls back to JSON serialization. When no `metadataExtractor` is provided, it extracts common fields (`id`, `title`, `name`, `created_at`, `updated_at`, `author`, `tags`).
+
+**Features:**
+- REST API data ingestion (GET/POST)
+- Automatic pagination handling with configurable start, step, and max pages
+- Custom content and metadata extractors
+- JSON path support for nested data via `dataPath`
+- Configurable timeout and chunking
+
+### JSONSource
+
+Index data from local JSON files:
+
+```typescript
+import { JSONSource } from '@toolpack-sdk/knowledge';
+
+const source = new JSONSource('./data/products.json', {
+  toContent: (item: any) => `${item.name}\n\n${item.description}`,  // Required
+  filter: (item: any) => item.active === true,                       // Optional: filter items
+  chunkSize: 100,                                                     // Items per chunk (default: 100)
+  namespace: 'products',                                              // Chunk ID prefix (default: 'json')
+  metadata: { source: 'products-db' },                               // Added to all chunks
+});
+```
+
+**Constructor:** `new JSONSource(filePath: string, options: JSONSourceOptions)`
+
+The `toContent` callback is **required**. The source handles both JSON arrays (with optional item-level `filter`) and single JSON objects.
+
+**Features:**
+- Parses JSON arrays or single objects
+- Optional item-level filtering
+- Configurable items per chunk
+- Metadata includes source filename, chunk index range, and total item count
+
+### SQLiteSource
+
+Index rows from a SQLite database. Requires the `better-sqlite3` package:
+
+```bash
+npm install better-sqlite3
+```
+
+```typescript
+import { SQLiteSource } from '@toolpack-sdk/knowledge';
+
+const source = new SQLiteSource('./data/app.db', {
+  query: 'SELECT id, title, body FROM articles WHERE published = 1',  // Optional SQL query
+  toContent: (row) => `${row.title}\n\n${row.body}`,                  // Required
+  chunkSize: 50,                                                        // Rows per chunk (default: 100)
+  namespace: 'articles',                                                // Chunk ID prefix (default: 'sqlite')
+  metadata: { source: 'sqlite' },                                       // Added to all chunks
+  preLoadCSV: {                          // Optional: load a CSV into the DB before querying
+    tableName: 'articles',
+    csvPath: './data/articles.csv',
+    delimiter: ',',                      // Column delimiter (default: ',')
+    headers: true,                       // First row is a header (default: true)
   },
 });
 ```
 
+**Constructor:** `new SQLiteSource(dbPath: string, options: SQLiteSourceOptions)`
+
+The `toContent` callback is **required**. If `query` is not provided it defaults to `SELECT * FROM sqlite_master WHERE type = "table"`.
+
 **Features:**
-- REST API data ingestion with authentication
-- Multiple pagination strategies (offset, cursor, page-based)
-- Rate limiting and request throttling
-- Custom response transformation
-- Error handling and retries
-- Support for all HTTP methods
+- Arbitrary SQL queries
+- Required `toContent` callback to control what gets embedded
+- Optional CSV/TSV pre-loading into the database before querying
+- Metadata includes source filename, query, and row index range
+
+### PostgresSource
+
+Index rows from a PostgreSQL database. Requires the `pg` package:
+
+```bash
+npm install pg
+```
+
+```typescript
+import { PostgresSource } from '@toolpack-sdk/knowledge';
+
+// Using a connection string
+const source = new PostgresSource({
+  connectionString: process.env.DATABASE_URL,
+  query: 'SELECT id, title, content FROM docs WHERE status = $1',
+  toContent: (row) => `${row.title}\n\n${row.content}`,  // Required
+  chunkSize: 50,
+  namespace: 'docs',
+  metadata: { source: 'postgres' },
+  ssl: true,
+});
+
+// Using individual connection parameters
+const source2 = new PostgresSource({
+  host: 'localhost',
+  port: 5432,
+  database: 'mydb',
+  user: 'admin',
+  password: process.env.DB_PASSWORD,
+  query: 'SELECT title, body FROM posts',
+  toContent: (row) => `${row.title}\n\n${row.body}`,
+});
+```
+
+**Constructor:** `new PostgresSource(options: PostgresSourceOptions)`
+
+The `query` and `toContent` fields are **required**. Use either `connectionString` or the individual `host`/`port`/`database`/`user`/`password` fields.
+
+**Features:**
+- Arbitrary SQL queries
+- Connection via connection string or individual parameters
+- SSL support
+- Required `toContent` callback to control what gets embedded
+- Metadata includes query and row index range
 
 ## Embedders
 
@@ -199,7 +317,7 @@ Local embeddings using Ollama (zero API cost):
 import { OllamaEmbedder } from '@toolpack-sdk/knowledge';
 
 const embedder = new OllamaEmbedder({
-  model: 'nomic-embed-text',           // or 'mxbai-embed-large', 'all-minilm'
+  model: 'nomic-embed-text',           // or 'mxbai-embed-large', 'all-minilm', etc.
   baseUrl: 'http://localhost:11434',   // default
   retries: 3,
   retryDelay: 1000,
@@ -232,6 +350,59 @@ const embedder = new OpenAIEmbedder({
 - `text-embedding-3-small` (1536 dimensions)
 - `text-embedding-3-large` (3072 dimensions)
 - `text-embedding-ada-002` (1536 dimensions)
+
+### OpenRouterEmbedder
+
+Embeddings via OpenRouter, giving access to OpenAI embedding models through a single API key:
+
+```typescript
+import { OpenRouterEmbedder } from '@toolpack-sdk/knowledge';
+
+const embedder = new OpenRouterEmbedder({
+  model: 'openai/text-embedding-3-small',  // Required
+  apiKey: process.env.OPENROUTER_API_KEY!, // Required
+  dimensions: 1536,                         // Optional: override auto-detected dimensions
+  retries: 3,                               // Default: 3
+  retryDelay: 1000,                         // ms, default: 1000
+  timeout: 30000,                           // ms, default: 30000
+});
+```
+
+**Known models (dimensions auto-detected):**
+- `openai/text-embedding-3-small` (1536 dimensions)
+- `openai/text-embedding-3-large` (3072 dimensions)
+- `openai/text-embedding-ada-002` (1536 dimensions)
+- `nvidia/llama-nemotron-embed-vl-1b-v2` (4096 dimensions)
+
+For any model not in the list above, pass `dimensions` explicitly.
+
+### VertexAIEmbedder
+
+Google Cloud Vertex AI embedding models. Authenticates via [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials):
+
+```typescript
+import { VertexAIEmbedder } from '@toolpack-sdk/knowledge';
+
+const embedder = new VertexAIEmbedder({
+  projectId: 'my-gcp-project',   // Required (or set VERTEX_AI_PROJECT / GOOGLE_CLOUD_PROJECT env var)
+  location: 'us-central1',       // GCP region (default: 'us-central1')
+  model: 'gemini-embedding-001', // Embedding model (default: 'gemini-embedding-001')
+  outputDimensionality: 3072,    // Optional: override output dimensions
+  retries: 3,                    // Default: 3
+  retryDelay: 1000,              // ms, default: 1000
+});
+```
+
+If `projectId` is not set in options, the embedder falls back to the `VERTEX_AI_PROJECT`, `TOOLPACK_VERTEXAI_PROJECT`, or `GOOGLE_CLOUD_PROJECT` environment variables. If none are set, it throws at construction time.
+
+**Supported models:**
+- `gemini-embedding-001` (3072 dimensions, default)
+- `text-embedding-005` (768 dimensions)
+- `text-multilingual-embedding-002` (768 dimensions)
+
+For any other model pass `outputDimensionality` explicitly.
+
+**Important:** Changing `outputDimensionality` after initial indexing requires wiping the knowledge store, as the dimension count must be consistent.
 
 ## Integration with Toolpack SDK
 
@@ -351,6 +522,34 @@ const results = await kb.query('authentication setup', {
 { source: 'api', statusCode: 200 }
 ```
 
+## Utility Functions
+
+The package exports two utility functions for building custom search pipelines:
+
+### keywordSearch
+
+```typescript
+import { keywordSearch } from '@toolpack-sdk/knowledge';
+
+const score = keywordSearch(text, query);
+// Returns a number between 0 and 1.
+// Returns 1.0 on exact substring match.
+// Returns a fractional score based on the proportion of query words found in text.
+// Returns 0.0 when no query words (longer than 2 characters) are found.
+```
+
+### combineScores
+
+```typescript
+import { combineScores } from '@toolpack-sdk/knowledge';
+
+const combined = combineScores(semanticScore, keywordScore, semanticWeight);
+// semanticWeight defaults to 0.7 (70% semantic, 30% keyword).
+// Returns: semanticScore * semanticWeight + keywordScore * (1 - semanticWeight)
+```
+
+Use these functions when implementing custom hybrid search logic outside of `hybridQuery`.
+
 ## Streaming Ingestion
 
 Process large datasets with real-time progress tracking:
@@ -363,16 +562,16 @@ await kb.sync();
 for await (const progress of kb.syncStream()) {
   switch (progress.type) {
     case 'count':
-      console.log(`📊 Total chunks to process: ${progress.total}`);
+      console.log(`Total chunks to process: ${progress.total}`);
       break;
     case 'progress':
-      console.log(`⏳ Processed ${progress.processed}/${progress.total} chunks (${progress.percent}%)`);
+      console.log(`Processed ${progress.processed}/${progress.total} chunks (${progress.percent}%)`);
       break;
     case 'complete':
-      console.log(`✅ Sync complete! Processed ${progress.total} chunks`);
+      console.log(`Sync complete! Processed ${progress.total} chunks`);
       break;
     case 'error':
-      console.error('❌ Sync failed:', progress.error);
+      console.error('Sync failed:', progress.error);
       break;
   }
 }
@@ -424,7 +623,8 @@ interface KnowledgeOptions {
   sources: KnowledgeSource[];
   embedder: Embedder;
   description: string;              // Required: used as tool description
-  reSync?: boolean;                   // default: true
+  reSync?: boolean;                 // default: true
+  streamingBatchSize?: number;      // Chunks processed per batch (default: 100)
   onError?: ErrorHandler;
   onSync?: SyncEventHandler;
   onEmbeddingProgress?: EmbeddingProgressHandler;
@@ -534,21 +734,19 @@ onEmbeddingProgress: (event) => {
 
 6. **Web crawling best practices:**
    - Set appropriate `delayMs` (1000ms+ for respectful crawling)
-   - Use `allowedDomains` to stay within your site
-   - Limit `maxDepth` and `maxPages` to avoid excessive crawling
+   - Use `sameDomainOnly: true` (the default) to stay within your site
+   - Limit `maxDepth` and `maxPagesPerDomain` to avoid excessive crawling
    - Check `robots.txt` compliance manually
 
 7. **API data ingestion:**
-   - Implement rate limiting to respect API limits
-   - Use `transformResponse` for complex data structures
-   - Handle pagination correctly for large datasets
-   - Cache API responses when possible
+   - Use `contentExtractor` for complex data structures
+   - Use `dataPath` to target nested arrays in API responses
+   - Configure `pagination` for large datasets
 
 8. **Hybrid search optimization:**
    - Use hybrid search for technical content with proper nouns
    - Adjust `keywordWeight` higher for exact term matching
    - Use `semanticWeight` higher for conceptual searches
-   - Experiment with `keywordFields` for different content types
 
 ## Troubleshooting
 
@@ -564,8 +762,8 @@ onEmbeddingProgress: (event) => {
 **"No files found" with MarkdownSource:**
 ```typescript
 // Check glob pattern - use forward slashes even on Windows
-new MarkdownSource('./docs/**/*.md')  // ✓
-new MarkdownSource('.\\docs\\**\\*.md')  // ✗
+new MarkdownSource('./docs/**/*.md')  // correct
+new MarkdownSource('.\\docs\\**\\*.md')  // incorrect
 ```
 
 **Slow embedding:**
@@ -579,23 +777,32 @@ new MarkdownSource('.\\docs\\**\\*.md')  // ✗
 ```typescript
 // Check robots.txt and respect site policies
 // Add user agent and delay between requests
-// Use allowedDomains to limit crawling scope
-const source = new WebUrlSource(url, {
+// Use sameDomainOnly to limit crawling scope
+const source = new WebUrlSource(['https://example.com'], {
   userAgent: 'MyApp/1.0 (contact@example.com)',
   delayMs: 2000,
-  allowedDomains: ['example.com'],
+  sameDomainOnly: true,
 });
 ```
 
-**API rate limiting:**
+**VertexAI authentication errors:**
 ```typescript
-// Implement rate limiting in ApiSource
-const source = new ApiSource(baseUrl, endpoint, {
-  rateLimit: {
-    requestsPerSecond: 1,
-    requestsPerMinute: 60,
-  },
+// Ensure Application Default Credentials are configured
+// Run: gcloud auth application-default login
+// Or set GOOGLE_APPLICATION_CREDENTIALS env var to a service account key file
+const embedder = new VertexAIEmbedder({
+  projectId: process.env.GOOGLE_CLOUD_PROJECT,
+  location: 'us-central1',
 });
+```
+
+**SQLiteSource or PostgresSource peer dependency missing:**
+```bash
+# SQLiteSource requires better-sqlite3
+npm install better-sqlite3
+
+# PostgresSource requires pg
+npm install pg
 ```
 
 **Hybrid search not returning expected results:**
@@ -606,7 +813,6 @@ const source = new ApiSource(baseUrl, endpoint, {
 const results = await kb.hybridQuery(query, {
   keywordWeight: 0.4,    // Increase for technical terms
   semanticWeight: 0.6,   // Increase for concepts
-  keywordFields: ['content', 'title', 'metadata.tags'],
 });
 ```
 

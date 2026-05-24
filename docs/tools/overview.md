@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-description: "Explore the built-in tools in Toolpack SDK across 11 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, cloud deployment, and Kubernetes."
-keywords: [AI tools, built-in tools, tool calling, LLM tools, filesystem tools, HTTP tools, database tools, git tools, Kubernetes tools, Toolpack SDK tools]
+description: "Explore the built-in tools in Toolpack SDK across 14 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, cloud deployment, Kubernetes, Slack, GitHub, and Skills."
+keywords: [AI tools, built-in tools, tool calling, LLM tools, filesystem tools, HTTP tools, database tools, git tools, Kubernetes tools, Slack tools, GitHub tools, skill tools, Toolpack SDK tools]
 ---
 
 # Tools Overview
 
-Toolpack SDK includes **built-in tools** across 11 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
+Toolpack SDK includes **built-in tools** across 14 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
 
 ## Enabling Tools
 
@@ -27,11 +27,14 @@ const toolpack = await Toolpack.init({
 | [HTTP](/tools/http) | 5 | HTTP requests (GET, POST, PUT, DELETE) |
 | [Web](/tools/web) | 9 | Web search (Tavily/Brave/DuckDuckGo), scraping, metadata, feeds |
 | [Coding](/tools/coding) | 12 | AST-aware code analysis and refactoring |
-| [Git](/tools/git) | 9 | Version control operations |
+| [Git](/tools/git) | 10 | Version control operations |
 | [Diff](/tools/diff) | 3 | Create and apply patches |
 | [Database](/tools/database) | 7 | SQL queries and database operations |
 | [Cloud](/tools/cloud) | 3 | Deploy to cloud platforms |
 | [Kubernetes](/tools/kubernetes) | 11 | Inspect and manage Kubernetes clusters with kubectl tools |
+| [Slack](/tools/slack) | 6 | Post messages, read channel history, manage threads, and add reactions via Slack Web API |
+| [GitHub](/tools/github) | 9 | PR reviews, file contents, GraphQL queries, and issue comments via GitHub API |
+| [Skills](/tools/skills) | 4 | Create, read, update, and list behavioral skill files |
 
 ## How Tools Work
 

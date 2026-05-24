@@ -1,12 +1,12 @@
 ---
 sidebar_position: 6
-description: "Create custom workflows in Toolpack SDK. Use workflow presets or build custom configurations with planning prompts, step prompts, and execution strategies."
-keywords: [custom workflows, workflow presets, planning prompts, step prompts, AI workflow customization, Toolpack SDK workflows]
+description: "Create custom workflows in Toolpack SDK. Use workflow presets or build custom configurations with planning prompts and parallel tool execution."
+keywords: [custom workflows, workflow presets, planning prompts, AI workflow customization, plan-direct execution, Toolpack SDK workflows]
 ---
 
 # Custom Workflows
 
-Create custom workflows to control how the AI plans and executes tasks. Use built-in presets or define your own planning and execution behavior.
+Create custom workflows to control how the AI plans and executes tasks. Use built-in presets or define your own planning behavior.
 
 ## Workflow Presets
 
@@ -18,7 +18,7 @@ import { AGENT_WORKFLOW, CODING_WORKFLOW, CHAT_WORKFLOW } from 'toolpack-sdk';
 
 ### Agent Workflow
 
-Full planning for complex tasks.
+Full planning for complex tasks with plan-direct execution and parallel tools.
 
 ```typescript
 import { AGENT_WORKFLOW } from 'toolpack-sdk';
@@ -32,8 +32,8 @@ const myMode = createMode({
 
 **Features:**
 - Detailed planning phase
-- Step-by-step execution
-- Full failure handling with retries
+- Plan-direct execution with parallel tool orchestration
+- Plan steps are advisory guidance for the LLM
 
 ### Coding Workflow
 
@@ -96,7 +96,7 @@ const customMode: ModeConfig = {
             maxSteps: 15,
             planningPrompt: `You are a research planning assistant.
             
-            Create a step-by-step plan for gathering information on the user's topic.
+            Create a plan for gathering information on the user's topic.
             Each step should focus on one research action:
             1. Search for overview information
             2. Deep dive into specific aspects
@@ -105,24 +105,9 @@ const customMode: ModeConfig = {
             
             Keep plans concise and focused on information gathering.`,
         },
-        steps: {
-            enabled: true,
-            retryOnFailure: true,
-            maxRetries: 2,
-            allowDynamicSteps: true,
-            maxTotalSteps: 25,
-            stepPrompt: `Execute the current research step.
-            
-            Use available tools to gather information efficiently.
-            Document sources and key findings for each step.
-            If a search yields insufficient results, try alternative queries.`,
-        },
         progress: {
             enabled: true,
             reportPercentage: true,
-        },
-        onFailure: {
-            strategy: 'ask_user',  // 'abort' | 'skip' | 'ask_user'
         },
     },
 };
@@ -149,25 +134,6 @@ const analysisWorkflow = {
 };
 ```
 
-## Custom Step Prompts
-
-Control how individual steps are executed:
-
-```typescript
-const codingWorkflow = {
-    steps: {
-        enabled: true,
-        stepPrompt: `Execute this coding task step.
-        
-        Guidelines:
-        - Show only the code changes, no conversational filler
-        - Use diff format when modifying existing code
-        - Verify changes compile before proceeding
-        - Keep responses concise and technical`,
-    },
-};
-```
-
 ## Workflow Configuration Reference
 
 ### Planning Options
@@ -179,31 +145,12 @@ const codingWorkflow = {
 | `planningPrompt` | string | - | Custom system prompt for plan generation |
 | `maxSteps` | number | 20 | Maximum steps allowed in a plan |
 
-### Step Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | boolean | false | Enable step-by-step execution |
-| `stepPrompt` | string | - | Custom system prompt for step execution |
-| `retryOnFailure` | boolean | true | Retry failed steps |
-| `maxRetries` | number | 3 | Maximum retry attempts per step |
-| `allowDynamicSteps` | boolean | true | Allow adding steps during execution |
-| `maxTotalSteps` | number | 50 | Maximum total steps including dynamic |
-
 ### Progress Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enabled` | boolean | true | Emit progress events |
 | `reportPercentage` | boolean | true | Include completion percentage |
-
-### Failure Strategies
-
-| Strategy | Description |
-|----------|-------------|
-| `abort` | Stop execution immediately |
-| `skip` | Skip the failed step and continue |
-| `ask_user` | Pause and wait for user decision |
 
 ## Complete Example: Code Review Mode
 
@@ -229,15 +176,6 @@ const codeReviewMode = createMode({
             3. Check for common issues (security, performance, style)
             4. Review documentation and comments
             5. Synthesize findings into actionable feedback`,
-        },
-        steps: {
-            enabled: true,
-            stepPrompt: `Focus on specific aspects in each step:
-            - Note exact line numbers for issues
-            - Categorize findings (critical, warning, suggestion)
-            - Provide concrete improvement examples
-            - Keep feedback constructive and specific`,
-            allowDynamicSteps: false,  // Stick to the plan
         },
     },
 });

@@ -15,6 +15,7 @@ Toolpack SDK supports multiple AI providers out of the box. You use your own API
 | **OpenAI** | GPT-4o, o1, o3, and more | `OPENAI_API_KEY` |
 | **Anthropic** | Claude Sonnet, Haiku, Opus, and more | `ANTHROPIC_API_KEY` |
 | **Gemini** | Gemini Flash, Pro, and more | `GOOGLE_GENERATIVE_AI_KEY` |
+| **Vertex AI** | Gemini 2.5/2.0/1.5 models on GCP | None (uses ADC / service account) |
 | **Ollama** | Any locally installed model | None (local) |
 | **OpenRouter** | 300+ models (auto-discovered) | `OPENROUTER_API_KEY` |
 
@@ -193,6 +194,94 @@ const toolpack = await Toolpack.init({
 | Embeddings | ❌ |
 | Vision | ✅ (model-dependent) |
 | Model discovery | Dynamic (via `/models` endpoint) |
+
+## Google Vertex AI
+
+[Vertex AI](https://cloud.google.com/vertex-ai) gives you access to Gemini models hosted on Google Cloud Platform with enterprise-grade infrastructure and IAM-based access control. No API key is needed — authentication uses [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials).
+
+### Install dependencies
+
+```bash
+npm install @google-cloud/vertexai
+```
+
+### Configuration fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `projectId` | string | GCP project ID. Falls back to `TOOLPACK_VERTEXAI_PROJECT`, `VERTEX_AI_PROJECT`, or `GOOGLE_CLOUD_PROJECT` env vars. |
+| `location` | string | GCP region (default: `us-central1`). Falls back to `TOOLPACK_VERTEXAI_LOCATION` or `VERTEX_AI_LOCATION`. |
+| `googleAuthOptions.keyFilename` | string | Path to a service account key JSON file. |
+| `googleAuthOptions.credentials` | object | Inline service account credentials object. |
+
+When `googleAuthOptions` is omitted, ADC is used automatically (e.g. `gcloud auth application-default login` or a workload identity attached to a GKE pod).
+
+### Supported models
+
+| Model ID | Display name | Context window |
+|----------|--------------|----------------|
+| `gemini-2.5-pro-preview-05-06` | Gemini 2.5 Pro Preview | 1 M tokens |
+| `gemini-2.5-flash-preview-04-17` | Gemini 2.5 Flash Preview | 1 M tokens |
+| `gemini-2.0-flash-001` | Gemini 2.0 Flash | 1 M tokens |
+| `gemini-1.5-pro-002` | Gemini 1.5 Pro | 2 M tokens |
+| `gemini-1.5-flash-002` | Gemini 1.5 Flash | 1 M tokens |
+
+All models support chat, streaming, tool/function calling, and vision. Embeddings are not supported by this adapter — use the `gemini` provider with `text-embedding-004` instead.
+
+### Example — ADC (recommended)
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'vertexai',
+    projectId: 'my-gcp-project',   // or set GOOGLE_CLOUD_PROJECT env var
+    location: 'us-central1',        // optional, default
+});
+
+const response = await toolpack.generate({
+    model: 'gemini-2.5-flash-preview-04-17',
+    messages: [{ role: 'user', content: 'Hello!' }],
+});
+```
+
+### Example — Service account key file
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'vertexai',
+    projectId: 'my-gcp-project',
+    googleAuthOptions: {
+        keyFilename: '/path/to/service-account.json',
+    },
+});
+```
+
+### Example — Multi-provider setup
+
+```typescript
+const toolpack = await Toolpack.init({
+    providers: {
+        vertexai: {
+            projectId: process.env.GOOGLE_CLOUD_PROJECT,
+            location: 'europe-west4',
+        },
+        openai: {},
+    },
+    defaultProvider: 'vertexai',
+});
+```
+
+### Capability notes
+
+| Feature | Support |
+|---------|---------|
+| Chat completions | ✅ |
+| Streaming | ✅ |
+| Tool/function calling | ✅ |
+| Embeddings | ❌ |
+| Vision | ✅ |
+| Model discovery | Static list |
+
+---
 
 ## Custom Providers
 

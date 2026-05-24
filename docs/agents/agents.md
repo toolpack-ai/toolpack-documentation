@@ -99,8 +99,38 @@ class MyAgent extends BaseAgent {
       interval: 60000,
     }),
   ];
+
+  // Persistent cognitive layer — goals, beliefs, and reflections that survive across runs.
+  // Requires @toolpack-sdk/knowledge. See mind.md.
+  mind = {
+    embedder: new OpenAIEmbedder({ apiKey: process.env.OPENAI_API_KEY! }),
+    tokenBudget: 300,
+    ttlDefaults: { belief: '30d' },
+  };
+
+  // AI-driven delegation — injects a delegation tool so the LLM can hand tasks to peer agents.
+  // Only active when registered in an AgentRegistry with peers. See transport.md.
+  delegation = {
+    enabled: true,
+    mode: 'await',           // 'await' | 'forget'
+    allowedAgents: ['data-agent', 'coding-agent'],  // omit to allow all peers
+  };
 }
 ```
+
+**Optional property reference:**
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `provider` | `string` | Inherits from Toolpack | Provider override for this agent (e.g. `'anthropic'`, `'openai'`). |
+| `model` | `string` | Provider default | Model override for this agent. |
+| `workflow` | `Record<string, unknown>` | — | Workflow config merged on top of mode config. |
+| `conversationHistory` | `ConversationStore` | `InMemoryConversationStore` | Message history store. Replace with a DB-backed implementation for production. |
+| `assemblerOptions` | `AssemblerOptions` | assemblePrompt defaults | Options forwarded to `assemblePrompt()` when building LLM context from history. |
+| `channels` | `ChannelInterface[]` | `[]` | Channels this agent listens on. Can also be set after construction. |
+| `interceptors` | `Interceptor[]` | `[]` | Middleware chain applied before `invokeAgent` is called. |
+| `mind` | `AgentMindConfig` | — | Persistent memory: goals, beliefs, reflections. See [mind.md](mind.md). |
+| `delegation` | `AgentDelegationConfig` | — | Injects delegation tools into the LLM's tool list so the model can autonomously delegate to other agents. See [transport.md](transport.md). |
 
 ### `mode` values
 

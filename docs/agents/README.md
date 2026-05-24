@@ -8,13 +8,6 @@ keywords: [agents, AI agents, BaseAgent, channels, interceptors, conversation hi
 
 # toolpack-agents — Complete Guide
 
-:::caution Pre-release
-`@toolpack-sdk/agents` is currently in **alpha** (`2.0.0-alpha.1`). APIs may change before the stable release. Install with:
-
-```bash
-npm install @toolpack-sdk/agents@alpha
-```
-:::
 
 `toolpack-agents` is the agent layer of the Toolpack SDK. It provides a consistent, extensible pattern for building, composing, and deploying AI agents that communicate through real-world channels (Slack, Discord, Telegram, webhooks, SMS, scheduled jobs) and collaborate with each other.
 
@@ -71,6 +64,8 @@ npm install @toolpack-sdk/agents@alpha
 | [agents.md](agents.md) | Creating agents — `BaseAgent` API, built-in agents, lifecycle |
 | [registry.md](registry.md) | `AgentRegistry` — multi-agent coordination |
 | [channels.md](channels.md) | All 7 channel integrations (Slack, Discord, Telegram, Webhook, Scheduled, Email, SMS) |
+| [scheduler.md](scheduler.md) | `SchedulerStore` and `createSchedulerTools` — persistent job scheduling reference |
+| [mind.md](mind.md) | `AgentMind` — persistent cognitive layer: goals, beliefs, reflections |
 | [conversation-history.md](conversation-history.md) | Conversation storage, `assemblePrompt`, addressed-only mode |
 | [interceptors.md](interceptors.md) | Interceptor system — all 10 built-in interceptors and custom interceptors |
 | [transport.md](transport.md) | Transport layer — `LocalTransport`, `JsonRpcTransport`, delegation |
