@@ -1,5 +1,5 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 description: "MCP in Toolpack SDK: consume external MCP servers as tools (client), or expose Toolpack's 100+ built-in tools to any MCP client (server) with auth, search mode, and agent exposure."
 keywords: [MCP server, MCP client, Model Context Protocol, startMcpServer, McpChannel, tool search, bearer auth, JWT, Toolpack SDK MCP]
 ---

@@ -33,6 +33,7 @@ const sidebars: SidebarsConfig = {
         'guides/custom-workflows',
         'guides/custom-tools',
         'guides/multimodal',
+        'guides/structured-output',
         'guides/skills',
         'guides/hitl-confirmation',
         'guides/mcp-server',

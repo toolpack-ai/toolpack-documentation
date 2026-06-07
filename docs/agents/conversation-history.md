@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 sidebar_label: Conversation History
 description: "Store and assemble conversation history with InMemoryConversationStore and assemblePrompt(). Token budgeting, rolling summaries, and conversation_search tool."
 keywords: [InMemoryConversationStore, assemblePrompt, ConversationStore, conversation history, token budget, rolling summary]

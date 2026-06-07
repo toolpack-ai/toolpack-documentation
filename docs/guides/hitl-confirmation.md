@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 11
 description: "Configure Human-in-the-Loop (HITL) confirmations for high-risk tool operations. Control which tools require user approval before execution."
 keywords: [HITL, human-in-the-loop, tool confirmation, security, approval flow, bypass rules, risk levels]
 ---

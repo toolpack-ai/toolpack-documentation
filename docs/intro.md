@@ -13,17 +13,6 @@ keywords: [Toolpack SDK, TypeScript AI SDK, production AI agents, AI agent frame
 **Organizations:**  
 [![GitHub Org](https://img.shields.io/badge/GitHub-toolpack--ai-black?logo=github)](https://github.com/toolpack-ai) [![npm Org](https://img.shields.io/badge/npm-@toolpack--sdk-orange?logo=npm)](https://www.npmjs.com/org/toolpack-sdk)
 
-<div style={{position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '12px', marginBottom: '24px'}}>
-  <iframe
-    style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%'}}
-    src="https://www.youtube.com/embed/iepIyGe0tao"
-    title="Toolpack SDK Demo"
-    frameBorder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowFullScreen
-  />
-</div>
-
 **Toolpack SDK** is the open source **TypeScript SDK for building production AI agents**. It gives you everything you need in one package — tools, channels, cognition, and knowledge — without stitching together five different libraries.
 
 ## Why Toolpack SDK?

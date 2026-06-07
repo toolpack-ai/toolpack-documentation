@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 sidebar_label: Scheduler
 description: "SchedulerStore and createSchedulerTools reference — persistent SQLite job scheduling, recurring cron jobs, one-shot run-at jobs, and LLM-callable scheduler tools."
 keywords: [SchedulerStore, createSchedulerTools, ScheduledChannel, cron, scheduled jobs, dynamic scheduling, SQLite]
