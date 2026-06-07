@@ -1,5 +1,7 @@
 ---
 sidebar_position: 7
+description: "Learn how to build and load custom tools in Toolpack SDK using createToolProject. Extend AI agents with domain-specific tools that integrate with the SDK's context and logging system."
+keywords: [custom tools, createToolProject, Toolpack SDK, AI tools, tool development, custom AI tools, TypeScript tools]
 ---
 
 # Custom Tools

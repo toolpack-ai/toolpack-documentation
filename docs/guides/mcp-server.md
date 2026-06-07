@@ -1,18 +1,21 @@
 ---
 sidebar_position: 11
-description: "Integrate Model Context Protocol (MCP) servers with Toolpack SDK to extend AI capabilities with external tools and services."
-keywords: [MCP server, Model Context Protocol, tool integration, external tools, Toolpack SDK MCP, MCP tools]
+description: "MCP in Toolpack SDK: consume external MCP servers as tools (client), or expose Toolpack's 100+ built-in tools to any MCP client (server) with auth, search mode, and agent exposure."
+keywords: [MCP server, MCP client, Model Context Protocol, startMcpServer, McpChannel, tool search, bearer auth, JWT, Toolpack SDK MCP]
 ---
 
-# MCP Server Integration
+# MCP — Client & Server
 
-Toolpack SDK supports the Model Context Protocol (MCP), allowing you to integrate external tool servers that expose additional capabilities to your AI agents. MCP enables seamless connection to specialized services like databases, APIs, and development tools.
+Toolpack SDK supports the Model Context Protocol (MCP) in **both directions**:
+
+- **MCP Client** — bridge any external MCP server into Toolpack as first-class tools
+- **MCP Server** — expose Toolpack's 100+ built-in tools (or a filtered subset) to any MCP client: Claude Desktop, Cursor, or your own agents
 
 ## What is MCP?
 
 The Model Context Protocol is an open standard that defines how AI models can interact with external tools and data sources. MCP servers provide a standardized way to expose tools, resources, and prompts to AI assistants.
 
-Toolpack SDK includes built-in MCP client support, allowing you to connect to any MCP-compatible server and use its tools within your AI workflows.
+## MCP Client — Consuming External MCP Servers
 
 ## Setting Up MCP Servers
 
@@ -182,8 +185,201 @@ const sdk = await Toolpack.init({
 });
 ```
 
+---
+
+## MCP Server — Exposing Toolpack to MCP Clients
+
+`sdk.startMcpServer()` turns Toolpack into a fully-spec-compliant MCP server. Any MCP client — Claude Desktop, Cursor, or your own code — can connect and call Toolpack's tools.
+
+### Minimal HTTP server
+
+```typescript
+const sdk = await Toolpack.init({ provider: 'anthropic', tools: true });
+
+const handle = await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+});
+
+console.log(`MCP server on port ${handle.port}, ${handle.toolCount} tools exposed`);
+// handle.stop() to shut down
+```
+
+### stdio (Claude Desktop / Cursor)
+
+```typescript
+await sdk.startMcpServer({ transport: 'stdio' });
+```
+
+Add to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "toolpack": {
+      "command": "node",
+      "args": ["path/to/your-server.js"]
+    }
+  }
+}
+```
+
+### Filtering exposed tools
+
+```typescript
+// Expose only filesystem and git tools
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  expose: { categories: ['filesystem', 'version-control'] },
+});
+
+// Expose specific tools by name
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  expose: { tools: ['fs.read_file', 'fs.write_file', 'git.commit'] },
+});
+```
+
+### Authentication
+
+Three auth modes are supported for HTTP transport. When `auth` is omitted, the server accepts all requests (safe for localhost only).
+
+#### Static tokens (dev / self-hosted)
+
+```typescript
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  auth: {
+    mode: 'static',
+    tokens: [process.env.MCP_TOKEN!],
+    // Pass multiple tokens for zero-downtime rotation
+  },
+});
+```
+
+#### JWT (Auth0, Supabase, Clerk)
+
+```typescript
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  auth: {
+    mode: 'jwt',
+    jwksUrl: 'https://your-tenant.auth0.com/.well-known/jwks.json',
+    audience: 'https://your-mcp-server.example.com',
+    issuer:   'https://your-tenant.auth0.com/',
+    requiredScopes: ['tools:read'],
+  },
+});
+```
+
+#### Custom verification
+
+```typescript
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  auth: {
+    mode: 'custom',
+    verifyAccessToken: async (token) => {
+      const user = await db.findByToken(token);
+      if (!user) throw new Error('invalid token');
+      return { token, clientId: user.id, scopes: user.scopes };
+    },
+  },
+});
+```
+
+### Search mode
+
+When `searchMode: true`, `tools/list` returns only `tool.search` instead of all 100+ tools. MCP clients call `tool.search` to discover tools on demand — dramatically reducing context token usage for large tool sets.
+
+```typescript
+const sdk = await Toolpack.init({
+  provider: 'anthropic',
+  tools: true,
+  modeOverrides: {
+    default: { toolSearch: { enabled: true } },
+  },
+});
+
+await sdk.startMcpServer({
+  transport: 'http',
+  port: 3000,
+  searchMode: true,
+});
+```
+
+Add the following to your MCP client's system prompt:
+
+```
+This server exposes tools via tool.search. Before calling any tool, use tool.search
+with a short keyword query to discover available tools. Then call the tool by name.
+```
+
+### Exposing agents as MCP tools
+
+Use `McpChannel` from `@toolpack-sdk/agents` to expose a Toolpack agent as an MCP tool. The agent appears in `tools/list` as `agent.<name>`.
+
+```typescript
+import { McpChannel } from '@toolpack-sdk/agents';
+
+const ch = new McpChannel();
+const agent = new PrReviewerAgent({ channels: [ch] });
+await agent.start();
+
+await sdk.startMcpServer({
+  transport: 'stdio',
+  agents: [ch.asAgentDefinition(agent)],
+});
+```
+
+Alternatively, use a plain object — no `@toolpack-sdk/agents` dependency required:
+
+```typescript
+await sdk.startMcpServer({
+  transport: 'stdio',
+  agents: [{
+    name: 'pr_reviewer',
+    description: 'Reviews a pull request end-to-end.',
+    inputSchema: {
+      type: 'object',
+      properties: { pr_url: { type: 'string' } },
+      required: ['pr_url'],
+    },
+    invoke: async (args) => {
+      const result = await prReviewer.invokeAgent({ data: args });
+      return result.output;
+    },
+  }],
+});
+```
+
+### `McpServerHandle`
+
+`startMcpServer()` returns a handle:
+
+| Property / Method | Description |
+|---|---|
+| `handle.port` | Bound port (HTTP only). Useful with `port: 0` (OS-assigned free port). |
+| `handle.toolCount` | Number of tools currently exposed. |
+| `handle.stop()` | Gracefully shut down the server. |
+
+### port: 0 — OS-assigned port
+
+Pass `port: 0` to let the OS choose a free port. Read the actual port from `handle.port`:
+
+```typescript
+const handle = await sdk.startMcpServer({ transport: 'http', port: 0 });
+console.log(`Listening on port ${handle.port}`);
+```
+
 ## Next Steps
 
-- Explore the MCP specification for more details
-- Check out available MCP servers
-- Learn about custom tools to build your own MCP-compatible servers
+- See `packages/toolpack-sdk/docs/examples/mcp-server-example.ts` for a full working example
+- Explore the MCP specification for protocol details
+- Learn about [McpChannel](../agents/channels.md) for exposing agents over MCP
+- Check out available MCP servers to use as a client

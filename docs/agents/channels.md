@@ -1,8 +1,8 @@
 ---
 sidebar_position: 3
 sidebar_label: Channels
-description: "Connect agents to Slack, Telegram, Discord, Email, SMS, Webhook, and ScheduledChannel. Two-way vs trigger-only channels and configuration options."
-keywords: [SlackChannel, TelegramChannel, DiscordChannel, EmailChannel, SMSChannel, WebhookChannel, ScheduledChannel]
+description: "Connect agents to Slack, Telegram, Discord, Email, SMS, Webhook, ScheduledChannel, and McpChannel. Two-way vs trigger-only channels and configuration options."
+keywords: [SlackChannel, TelegramChannel, DiscordChannel, EmailChannel, SMSChannel, WebhookChannel, ScheduledChannel, McpChannel, MCP]
 ---
 
 # Channels — Connecting Agents to External Systems
@@ -20,6 +20,7 @@ Channels normalise incoming events into `AgentInput` and deliver `AgentOutput` b
 - [ScheduledChannel](#scheduledchannel)
 - [EmailChannel](#emailchannel)
 - [SMSChannel](#smschannel)
+- [McpChannel](#mcpchannel)
 - [Custom channels](#custom-channels)
 
 ---
@@ -438,6 +439,61 @@ const sms = new SMSChannel({
 ```
 
 `isTriggerChannel` is **dynamic**: `true` when `webhookPath` is not set (outbound-only), `false` when `webhookPath` is set (bidirectional). Sends SMS via the Twilio REST API.
+
+---
+
+## McpChannel
+
+`McpChannel` exposes a Toolpack agent as a tool in an MCP server. When an MCP client calls `agent.<name>`, the channel delivers the input to the agent and returns its output as the tool result.
+
+`isTriggerChannel = false` — the MCP client drives the conversation, so `ask()` works normally.
+
+### Configuration
+
+```typescript
+import { McpChannel } from '@toolpack-sdk/agents';
+
+const ch = new McpChannel({
+  // Optional: descriptive name used for sendTo() routing
+  name: 'mcp',
+});
+```
+
+### Wiring to an agent and MCP server
+
+```typescript
+import { McpChannel } from '@toolpack-sdk/agents';
+import { Toolpack } from 'toolpack-sdk';
+
+const ch = new McpChannel();
+const agent = new PrReviewerAgent({ channels: [ch] });
+await agent.start();
+
+const sdk = await Toolpack.init({ provider: 'anthropic', tools: true });
+
+await sdk.startMcpServer({
+  transport: 'stdio',     // or 'http'
+  agents: [ch.asAgentDefinition(agent)],
+});
+```
+
+`ch.asAgentDefinition(agent)` produces the `McpAgentDefinition` object that `startMcpServer` uses to register the agent in `tools/list` as `agent.<agentName>`.
+
+### `McpChannelConfig`
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `name` | `string` | `'mcp'` | Channel name for `sendTo()` routing. |
+
+### Flow
+
+1. MCP client calls `tools/call` with `name: 'agent.<agentName>'`
+2. `startMcpServer` routes the call to `ch.asAgentDefinition(agent).invoke(args)`
+3. `McpChannel` wraps args into an `AgentInput` and calls `agent.invokeAgent()`
+4. Agent runs, returns `AgentResult`
+5. Output is returned to the MCP client as a text tool result
+
+See [MCP Server guide](../guides/mcp-server.md) for full server configuration options.
 
 ---
 

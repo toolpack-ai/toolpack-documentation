@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
-description: "Configure AI providers in Toolpack SDK. Use OpenAI, Anthropic, Gemini, Ollama, or OpenRouter with multi-provider support, custom base URLs, and API key management."
-keywords: [AI providers, OpenAI provider, Anthropic provider, Gemini provider, Ollama local AI, OpenRouter provider, multi-provider SDK, LLM configuration]
+description: "Configure AI providers in Toolpack SDK. Use OpenAI, Anthropic, Gemini, Ollama, or OpenRouter to power your production AI agents — custom base URLs, API key management, and zero vendor lock-in."
+keywords: [AI providers, OpenAI provider, Anthropic provider, Gemini provider, Ollama local AI, OpenRouter provider, LLM configuration, production AI agents, Toolpack SDK]
 ---
 
 # Providers

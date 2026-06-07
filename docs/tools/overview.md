@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
-description: "Explore the built-in tools in Toolpack SDK across 14 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, cloud deployment, Kubernetes, Slack, GitHub, and Skills."
+description: "Explore the built-in tools in Toolpack SDK across 12 categories: filesystem, execution, system, HTTP, web, coding, git, diff, database, cloud deployment, Kubernetes, Slack, GitHub, and Skills."
 keywords: [AI tools, built-in tools, tool calling, LLM tools, filesystem tools, HTTP tools, database tools, git tools, Kubernetes tools, Slack tools, GitHub tools, skill tools, Toolpack SDK tools]
 ---
 
 # Tools Overview
 
-Toolpack SDK includes **built-in tools** across 14 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
+Toolpack SDK includes **built-in tools** across 12 categories. When you enable tools, the AI can automatically use them to accomplish tasks.
 
 ## Enabling Tools
 

@@ -2,7 +2,7 @@
 slug: why-toolpack-sdk-exists
 title: "Why Toolpack SDK Exists: Fixing the Fragmentation of AI Tooling"
 authors: [sajeer-babu]
-tags: [vision, architecture, multi-provider]
+tags: [vision, architecture, production-agents]
 description: "The current AI tooling landscape is fragmented. Here's why we built Toolpack SDK and how it addresses vendor lock-in, tool inconsistency, and production readiness."
 ---
 
@@ -166,7 +166,7 @@ We're building Toolpack SDK in the open. Here's what's on the roadmap:
 - **Community Tools**: A registry of reusable tools contributed by the community.
 - **Production Tooling**: Observability, caching, and deployment helpers for production systems.
 
-We're committed to keeping Toolpack SDK minimal, composable, and production-ready. More tools are always in development. No subscriptions, no vendor lock-in—just your API keys and a unified SDK.
+We're committed to keeping Toolpack SDK the most complete TypeScript SDK for production AI agents — more tools, channels, and capabilities always in development. No subscriptions, no vendor lock-in—just your API keys and a production-ready agent platform.
 
 ---
 

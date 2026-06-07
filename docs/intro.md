@@ -1,8 +1,8 @@
 ---
 sidebar_position: 1
 slug: /
-description: "Toolpack SDK is an open source unified TypeScript SDK for building AI-powered applications. Use OpenAI, Anthropic, Gemini, or Ollama with one API. Built-in tools, streaming, workflows, and zero vendor lock-in."
-keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, LLM, tool calling, multi-provider, AI agent, Node.js]
+description: "Toolpack SDK is the open source TypeScript SDK for building production AI agents — 100+ built-in tools, 8 channel integrations, AgentMind persistent cognitive layer, and Knowledge/RAG."
+keywords: [Toolpack SDK, TypeScript AI SDK, production AI agents, AI agent framework, Slack AI agent, Discord bot, Telegram bot, AgentMind, RAG, knowledge base, OpenAI, Anthropic, Gemini, Ollama, LLM, tool calling, Node.js]
 ---
 
 # Toolpack SDK
@@ -24,17 +24,17 @@ keywords: [Toolpack SDK, AI SDK, TypeScript, OpenAI, Anthropic, Gemini, Ollama, 
   />
 </div>
 
-The **Toolpack SDK** is an **open source** unified TypeScript SDK for building AI-powered applications. It provides a single, consistent API to work with multiple AI providers - OpenAI, Anthropic, Gemini, and Ollama - without vendor lock-in.
+**Toolpack SDK** is the open source **TypeScript SDK for building production AI agents**. It gives you everything you need in one package — tools, channels, cognition, and knowledge — without stitching together five different libraries.
 
 ## Why Toolpack SDK?
 
-- **Multi-Provider Support** - Switch between OpenAI, Anthropic, Gemini, or Ollama with a single line of code
-- **100+ Built-in Tools** - File system, Kubernetes, command execution, web scraping, database operations, and more
-- **No Subscription Required** - Use your own API keys directly with providers
-- **Three Built-in Modes** - Agent mode (full tool access), Coding mode (development-focused), and Chat mode (web-only access)
-- **Workflow Engine** - Automatic planning and step-by-step execution for complex tasks
-- **Agents Package** - Build production-ready AI agents with channels, interceptors, and multi-agent coordination
-- **Fully Extensible** - Create custom providers, modes, and tools
+- **Production-Ready Agents** - Build agents that run on Slack, Discord, Telegram, SMS, Email, Webhook, scheduled jobs, and MCP — 8 channel integrations out of the box
+- **100+ Built-in Tools** - File system, Kubernetes, command execution, web scraping, GitHub, database, diff, cloud, and more across 12 categories
+- **AgentMind Cognitive Layer** - Persistent goals, beliefs, and reflections that survive across runs — the only TypeScript SDK with a built-in cognitive memory model
+- **Knowledge / RAG** - Web crawling, REST API ingestion, hybrid semantic + keyword search, and streaming indexing across 6 source types
+- **Multi-Provider** - OpenAI, Anthropic, Gemini, Ollama, OpenRouter — switch with one line, no vendor lock-in
+- **Workflow Engine** - Automatic planning and step-by-step execution for complex multi-tool tasks
+- **Extensible at Every Layer** - Custom tools, channels, provider adapters, agents, modes, and interceptors — if Toolpack doesn't have it built in, you can build it in using the same interfaces the built-in components use
 
 ## Quick Example
 
@@ -63,7 +63,7 @@ for await (const chunk of stream) {
 | Feature | Description |
 |---------|-------------|
 | **Providers** | OpenAI, Anthropic, Gemini, Ollama + custom providers |
-| **Tools** | 100+ built-in tools across 14 categories |
+| **Tools** | 100+ built-in tools across 12 categories |
 | **Modes** | Agent (full access), Coding (development-focused), Chat (web-only), or custom |
 | **Workflows** | Direct execution or planned step-by-step |
 | **Streaming** | Real-time token streaming with tool execution |

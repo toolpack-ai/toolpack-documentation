@@ -1,8 +1,8 @@
 ---
 sidebar_position: 10
 sidebar_label: Testing
-description: "Test agents without live API calls using ScriptedLLM, createTestAgent, MockChannel, and captureEvents."
-keywords: [testing, ScriptedLLM, createTestAgent, MockChannel, captureEvents, unit testing agents]
+description: "Test agents without live API calls using ScriptedLLM, createTestAgent, MockChannel, and captureEvents. Run LLM-graded evals with EvalDataset, EvalRunner, and EvalScorer."
+keywords: [testing, ScriptedLLM, createTestAgent, MockChannel, captureEvents, EvalDataset, EvalRunner, EvalScorer, evals, unit testing agents]
 ---
 
 # Testing Agents
@@ -28,6 +28,7 @@ The testing utilities live in the `./testing` sub-path export, not in the main p
 - [createMockToolpackSequence()](#createmocktoolpacksequence)
 - [MockKnowledge class](#mockknowledge-class)
 - [Testing patterns](#testing-patterns)
+- [Evals — LLM quality evaluation](#evals--llm-quality-evaluation)
 
 ---
 
@@ -569,4 +570,168 @@ it('emits agent:error on failure', async () => {
   events.assertEvent('agent:error');
   events.stop();
 });
+
+---
+
+## Evals — LLM quality evaluation
+
+Unit tests verify agent wiring; evals verify agent **quality** — does the agent give correct, helpful answers on real inputs? The eval primitives let you build regression suites and track quality over time.
+
+### Import path
+
+```typescript
+import {
+  EvalDataset,
+  EvalRunner,
+  ExactMatchScorer,
+  ContainsScorer,
+  LLMJudgeScorer,
+  CustomScorer,
+  compareEvalRuns,
+  formatEvalReport,
+} from '@toolpack-sdk/agents';
+```
+
+### Quick start
+
+```typescript
+import { EvalDataset, EvalRunner, ContainsScorer } from '@toolpack-sdk/agents';
+
+const dataset = new EvalDataset([
+  {
+    id: 'greet-1',
+    input: 'Say hello',
+    expectedOutput: 'hello',
+  },
+  {
+    id: 'summarise-1',
+    input: 'Summarise: The sky is blue.',
+    expectedOutput: 'blue',
+  },
+]);
+
+const runner = new EvalRunner({
+  agent: myAgent,
+  dataset,
+  scorers: [new ContainsScorer()],
+});
+
+const run = await runner.run();
+console.log(`Score: ${run.averageScore * 100}%`);
+```
+
+### `EvalDataset`
+
+Holds a list of `EvalCase` objects.
+
+```typescript
+interface EvalCase {
+  id: string;              // unique identifier
+  input: string;           // message sent to the agent
+  expectedOutput: string;  // used by scorers
+  metadata?: Record<string, unknown>;
+}
+```
+
+Datasets can be loaded from arrays, JSON files, or built programmatically:
+
+```typescript
+// From array
+const dataset = new EvalDataset(cases);
+
+// Add cases
+dataset.add({ id: 'c3', input: 'test', expectedOutput: 'expected' });
+
+// Filter
+const subset = dataset.filter(c => c.id.startsWith('greet'));
+```
+
+### `EvalRunner`
+
+Runs each case through the agent and collects scored results.
+
+```typescript
+const runner = new EvalRunner({
+  agent,                    // BaseAgent instance
+  dataset,                  // EvalDataset
+  scorers,                  // EvalScorer[]
+  concurrency?: 1,          // parallel cases (default: 1)
+  conversationId?: string,  // fixed or per-run generated
+});
+
+const run: EvalRun = await runner.run();
+```
+
+### Scorers
+
+Four scorers are built in:
+
+| Scorer | Description |
+|---|---|
+| `ExactMatchScorer` | Score 1.0 if output === expectedOutput (trimmed, case-insensitive by default) |
+| `ContainsScorer` | Score 1.0 if output contains expectedOutput |
+| `LLMJudgeScorer` | Ask an LLM to score the output on a 0–1 scale |
+| `CustomScorer` | Your own scoring function |
+
+#### `LLMJudgeScorer`
+
+```typescript
+import { LLMJudgeScorer } from '@toolpack-sdk/agents';
+
+const judge = new LLMJudgeScorer({
+  sdk: myToolpack,
+  prompt: 'Is this response factually correct and helpful? Score 0-1.',
+  // Optional: pass a specific model name
+});
+
+const runner = new EvalRunner({ agent, dataset, scorers: [judge] });
+```
+
+#### `CustomScorer`
+
+```typescript
+import { CustomScorer } from '@toolpack-sdk/agents';
+
+const lengthScorer = new CustomScorer({
+  name: 'brevity',
+  score: async ({ output, expectedOutput }) => {
+    // Score 1.0 if shorter than expected, 0 if longer
+    return output.length <= expectedOutput.length ? 1.0 : 0.0;
+  },
+});
+```
+
+### Regression reports
+
+Compare two eval runs to catch regressions before merging:
+
+```typescript
+import { compareEvalRuns, formatEvalReport } from '@toolpack-sdk/agents';
+
+const baselineRun = await runnerV1.run();
+const currentRun  = await runnerV2.run();
+
+const report = compareEvalRuns(baselineRun, currentRun);
+console.log(formatEvalReport(report));
+// Prints a human-readable table of improvements and regressions
+```
+
+`compareEvalRuns` returns an `EvalReport` with `regressions` and `improvements` arrays so you can assert in CI:
+
+```typescript
+expect(report.regressions).toHaveLength(0);
+```
+
+### `EvalRun` shape
+
+```typescript
+interface EvalRun {
+  id: string;
+  startedAt: Date;
+  completedAt: Date;
+  results: EvalCaseResult[];
+  averageScore: number;
+  scoredResults: EvalScoredResult[];
+}
+```
 ```
