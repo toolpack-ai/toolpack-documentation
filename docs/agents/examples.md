@@ -1,5 +1,5 @@
 ---
-sidebar_position: 13
+sidebar_position: 15
 sidebar_label: Examples
 description: "End-to-end agent patterns: Slack bots, multi-agent delegation, scheduled digests, human-in-the-loop, webhook APIs, and multi-channel deployment."
 keywords: [examples, Slack bot, multi-agent, delegation, scheduled digest, human-in-the-loop, webhook, multi-channel]

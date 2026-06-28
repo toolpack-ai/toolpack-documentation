@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 sidebar_label: AgentRegistry
 description: "Manage multiple agents with AgentRegistry and the npm package registry for publishing and finding community agents."
 keywords: [AgentRegistry, registry, agent discovery, searchRegistry, multi-agent]

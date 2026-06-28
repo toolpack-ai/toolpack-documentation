@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 sidebar_label: Channels
 description: "Connect agents to Slack, Telegram, Discord, Email, SMS, Webhook, ScheduledChannel, and McpChannel. Two-way vs trigger-only channels and configuration options."
 keywords: [SlackChannel, TelegramChannel, DiscordChannel, EmailChannel, SMSChannel, WebhookChannel, ScheduledChannel, McpChannel, MCP]

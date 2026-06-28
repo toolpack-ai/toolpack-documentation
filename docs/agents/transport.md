@@ -1,5 +1,5 @@
 ---
-sidebar_position: 11
+sidebar_position: 13
 sidebar_label: Transport
 description: "Agent-to-agent communication with LocalTransport and JsonRpcTransport. Includes AgentJsonRpcServer for hosting remote agents."
 keywords: [LocalTransport, JsonRpcTransport, AgentJsonRpcServer, delegate, delegateAndWait, cross-process]

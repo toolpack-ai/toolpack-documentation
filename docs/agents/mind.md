@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 sidebar_label: 'Agent Mind'
 description: "Persistent cognitive layer for BaseAgent — goals, beliefs, and reflections that survive across runs. Covers AgentMindConfig, all 7 LLM-callable mind tools, TTL configuration, and draft buffer flush lifecycle."
 keywords: [AgentMind, AgentMindConfig, mind_recall, mind_believe, mind_reflect, mind_set_goal, mind_complete_goal, persistent memory, goals, beliefs, reflections, toolpack-knowledge]

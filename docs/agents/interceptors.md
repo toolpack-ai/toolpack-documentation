@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 sidebar_label: Interceptors
 description: "Compose middleware with interceptors — dedup, rate limiting, noise filtering, intent classification, address checking, and more. Write custom interceptors."
 keywords: [interceptors, middleware, rate limiting, dedup, noise filter, intent classifier, address check, composeChain]

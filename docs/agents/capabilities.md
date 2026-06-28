@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 sidebar_label: Capability Agents
 description: "Headless capability agents: IntentClassifierAgent for address classification and SummarizerAgent for history compression."
 keywords: [IntentClassifierAgent, SummarizerAgent, capabilities, headless agents, intent classification, history summarization]

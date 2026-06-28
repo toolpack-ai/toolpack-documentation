@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 14
 sidebar_label: Testing
 description: "Test agents without live API calls using ScriptedLLM, createTestAgent, MockChannel, and captureEvents. Run LLM-graded evals with EvalDataset, EvalRunner, and EvalScorer."
 keywords: [testing, ScriptedLLM, createTestAgent, MockChannel, captureEvents, EvalDataset, EvalRunner, EvalScorer, evals, unit testing agents]

@@ -62,15 +62,17 @@ keywords: [agents, AI agents, BaseAgent, channels, interceptors, conversation hi
 | File | What it covers |
 |---|---|
 | [agents.md](agents.md) | Creating agents — `BaseAgent` API, built-in agents, lifecycle |
-| [registry.md](registry.md) | `AgentRegistry` — multi-agent coordination |
-| [channels.md](channels.md) | All 8 channel integrations (Slack, Discord, Telegram, Webhook, Scheduled, Email, SMS, MCP) |
-| [scheduler.md](scheduler.md) | `SchedulerStore` and `createSchedulerTools` — persistent job scheduling reference |
+| [spawn.md](spawn.md) | Agent spawning — LLM-driven ephemeral sub-agents, parallel execution, self-replication |
 | [mind.md](mind.md) | `AgentMind` — persistent cognitive layer: goals, beliefs, reflections |
-| [conversation-history.md](conversation-history.md) | Conversation storage, `assemblePrompt`, addressed-only mode |
+| [channels.md](channels.md) | All 8 channel integrations (Slack, Discord, Telegram, Webhook, Scheduled, Email, SMS, MCP) |
 | [interceptors.md](interceptors.md) | Interceptor system — all 10 built-in interceptors and custom interceptors |
-| [transport.md](transport.md) | Transport layer — `LocalTransport`, `JsonRpcTransport`, delegation |
-| [human-in-the-loop.md](human-in-the-loop.md) | `ask()` / `handlePendingAsk()` — pausing agents for human input |
+| [conversation-history.md](conversation-history.md) | Conversation storage, `assemblePrompt`, addressed-only mode |
 | [capabilities.md](capabilities.md) | `IntentClassifierAgent` and `SummarizerAgent` |
+| [human-in-the-loop.md](human-in-the-loop.md) | `ask()` / `handlePendingAsk()` — pausing agents for human input |
+| [registry.md](registry.md) | `AgentRegistry` — multi-agent coordination |
+| [hot-reload.md](hot-reload.md) | `HotReloadWatcher` + `scheduleRestart()` — live code updates without dropping conversations |
+| [scheduler.md](scheduler.md) | `SchedulerStore` and `createSchedulerTools` — persistent job scheduling reference |
+| [transport.md](transport.md) | Transport layer — `LocalTransport`, `JsonRpcTransport`, delegation |
 | [testing.md](testing.md) | `createTestAgent`, `MockChannel`, `captureEvents` |
 | [examples.md](examples.md) | Full end-to-end examples |
 

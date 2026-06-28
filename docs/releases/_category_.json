@@ -1,0 +1,8 @@
+{
+  "label": "Release Notes",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "description": "What's new in each version of the Toolpack SDK — toolpack-sdk, @toolpack-sdk/knowledge, and @toolpack-sdk/agents."
+  }
+}

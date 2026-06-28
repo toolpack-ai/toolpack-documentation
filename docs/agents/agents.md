@@ -115,6 +115,20 @@ class MyAgent extends BaseAgent {
     mode: 'await',           // 'await' | 'forget'
     allowedAgents: ['data-agent', 'coding-agent'],  // omit to allow all peers
   };
+
+  // AI-driven spawning — injects spawn_agent and spawn_agents_parallel tools so the
+  // LLM can instantiate ephemeral helper agents on-demand. See spawn.md.
+  spawn = {
+    enabled: true,
+    templates: [
+      {
+        name: 'researcher',
+        description: 'Searches the web and summarises findings.',
+        systemPrompt: (task) => `You are a focused research agent. Task: ${task}`,
+      },
+    ],
+    maxDepth: 3,  // max recursive spawn depth
+  };
 }
 ```
 
@@ -131,6 +145,7 @@ class MyAgent extends BaseAgent {
 | `interceptors` | `Interceptor[]` | `[]` | Middleware chain applied before `invokeAgent` is called. |
 | `mind` | `AgentMindConfig` | — | Persistent memory: goals, beliefs, reflections. See [mind.md](mind.md). |
 | `delegation` | `AgentDelegationConfig` | — | Injects delegation tools into the LLM's tool list so the model can autonomously delegate to other agents. See [transport.md](transport.md). |
+| `spawn` | `AgentSpawnConfig` | — | Injects `spawn_agent` and `spawn_agents_parallel` tools so the LLM can instantiate ephemeral helper agents on-demand. See [spawn.md](spawn.md). |
 
 ### `mode` values
 
