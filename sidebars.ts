@@ -55,6 +55,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'agents/README',
         'agents/agents',
+        'agents/spawn',
         'agents/mind',
         'agents/channels',
         'agents/interceptors',
@@ -62,6 +63,7 @@ const sidebars: SidebarsConfig = {
         'agents/capabilities',
         'agents/human-in-the-loop',
         'agents/registry',
+        'agents/hot-reload',
         'agents/scheduler',
         'agents/transport',
         'agents/testing',
@@ -82,6 +84,8 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Release Notes',
       items: [
+        'releases/v2.5.0',
+        'releases/v2.4.0',
         'releases/v2.3.0',
         'releases/v2.2.0',
         'releases/v2.1.0',

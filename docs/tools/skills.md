@@ -60,7 +60,7 @@ Write a new `.skill.md` file to the skills directory. The file name is derived f
 | `title` | string | Yes | Human-readable display name, max 100 chars |
 | `description` | string | Yes | Short description used for BM25 indexing (not injected into context), max 300 chars |
 | `triggers` | string[] | Yes | 1–10 example phrases that should activate this skill, each max 100 chars |
-| `instructions` | string | Yes | Behavioral instructions injected into the agent's context when the skill matches, max 2000 chars |
+| `instructions` | string | Yes | Behavioral instructions injected into the agent's context when the skill matches, max 5000 chars |
 | `tags` | string[] | No | Optional tags for filtering. Max 10 tags, each max 30 chars |
 | `version` | string | No | Semver version string (default: `1.0.0`) |
 
@@ -83,7 +83,7 @@ Update one or more fields of an existing skill. Only the fields provided are cha
 | `title` | string | No | New display name, max 100 chars |
 | `description` | string | No | New description for BM25 indexing, max 300 chars |
 | `triggers` | string[] | No | Replacement trigger list (1–10 items, each max 100 chars). Replaces the existing list entirely |
-| `instructions` | string | No | Replacement instructions text, max 2000 chars. Replaces the existing instructions entirely |
+| `instructions` | string | No | Replacement instructions text, max 5000 chars. Replaces the existing instructions entirely |
 | `addExamples` | string | No | Content to append to the `## Examples` section (creates the section if it does not exist) |
 | `addTags` | string[] | No | Tags to add to the existing tag list. Duplicates are ignored |
 

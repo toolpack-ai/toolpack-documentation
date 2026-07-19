@@ -44,6 +44,9 @@ Guides the agent through a structured code review process. Used for PR reviews, 
 - "review this code"
 - "check my pull request"
 - "code review"
+- "look over my PR"
+- "find bugs in my implementation"
+- "audit this for security issues"
 
 ## Instructions
 
@@ -56,7 +59,17 @@ When reviewing code:
 
 ## Examples
 
-[Optional — loaded on-demand via skill.read only, never auto-injected]
+### Input
+
+A PR that adds a password reset endpoint with no rate limiting.
+
+### Output
+
+**Security**: No rate limiting on the reset endpoint — an attacker can enumerate valid emails. Add a per-IP limit (e.g. 5 requests per 15 minutes).
+
+**Missing test**: No test for the case where the reset token is expired. Add one.
+
+**Naming**: `resetUserPwd` → `resetPassword` — avoid abbreviations in public-facing method names.
 ```
 
 Now when a user sends a message like "review this PR", the interceptor automatically injects the code-review instructions before the LLM sees the message.
@@ -85,7 +98,7 @@ updated: 2026-01-15T10:00:00.000Z  # Optional. ISO 8601 timestamp.
 |---------|---------|-----------|-------|
 | `## Description` | Used for BM25 indexing. Not visible to the LLM. | No | 300 chars |
 | `## Triggers` | Example phrases used for BM25 indexing. Not visible to the LLM. | No | 1–10 triggers, 100 chars each |
-| `## Instructions` | The only section injected into the agent's context. | **Yes** | 2000 chars |
+| `## Instructions` | Appended to the system prompt (or a new system message is created if none exists). | **Yes — system prompt** | 5000 chars |
 | `## Examples` | Loaded on-demand via `skill.read`. Never auto-injected. | No | 3000 chars |
 
 ### Character Limits
@@ -97,7 +110,7 @@ updated: 2026-01-15T10:00:00.000Z  # Optional. ISO 8601 timestamp.
 | `tags` | 10 tags max, 30 chars each | Array of strings |
 | `## Description` | 300 chars | Required section |
 | `## Triggers` | 1–10 triggers, 100 chars each | At least one required |
-| `## Instructions` | 2000 chars | Required section |
+| `## Instructions` | 5000 chars | Required section |
 | `## Examples` | 3000 chars | Optional section |
 
 ---
@@ -121,7 +134,7 @@ Skills can be organized in subdirectories. The folder name becomes the skill's `
 
 ## The Skill Interceptor
 
-`createSkillInterceptor` registers an SDK-level interceptor that runs before every `Toolpack.generate()` call. It performs BM25 search on the last user message and injects matching skill instructions into the request.
+`createSkillInterceptor` registers an SDK-level interceptor that runs before every `Toolpack.generate()` call. It performs BM25 search on the last 3 user messages and injects matching skill instructions into the system prompt.
 
 ### Setup
 
@@ -153,13 +166,13 @@ const toolpack = await Toolpack.init({
 ### Activation Flow
 
 1. A message arrives and `Toolpack.generate()` is called.
-2. The interceptor extracts the last user message text.
+2. The interceptor builds a query from the last 3 user messages — short follow-ups gain meaning from earlier turns in the same thread.
 3. BM25 searches all skill files using weighted fields:
    - Name and title — weight ×3
    - Tags and triggers — weight ×2
    - Description — weight ×1
 4. Skills scoring above `minScore` are selected (up to `maxSkills`).
-5. Their `## Instructions` sections are prepended to the user message as a `<skill-instructions>` XML block.
+5. Their `## Instructions` sections are appended to the system prompt as a `<skill-instructions>` XML block (or a new system message is created at position 0 if none exists).
 6. The LLM runs with behavioral instructions already in context.
 
 ### Startup Validation
@@ -174,7 +187,7 @@ The interceptor validates all `.skill.md` files eagerly at `Toolpack.init()` tim
 
 - Built in-memory at startup — no external dependency.
 - Automatically reindexes when any `.skill.md` file's mtime changes.
-- Worst-case context cost: `maxSkills(3) × instructions_limit(2000 chars) = 6000 chars`.
+- Worst-case context cost: `maxSkills(3) × instructions_limit(5000 chars) = 15000 chars`.
 
 ---
 
@@ -213,11 +226,116 @@ See the [Skill Tools reference](/tools/skills) for full parameter details.
 
 ---
 
+## Writing Effective Triggers
+
+Triggers are the most important part of a skill. BM25 is a keyword search — it can only match words that appear in the triggers you write. If a user asks "make my queries faster" and your triggers only say "optimize database", it won't match.
+
+**Aim for 5–8 triggers.** A skill with fewer than 3 will generate a validation warning at startup.
+
+**Cover the vocabulary space:**
+
+| What to cover | Example (for a "database optimization" skill) |
+|---|---|
+| Short form | `"optimize queries"` |
+| Long form | `"my database queries are running slow"` |
+| Synonyms | `"speed up database"`, `"DB performance"` |
+| User vocabulary | `"why is my SQL so slow"` |
+| Domain term | `"query plan"`, `"index tuning"` |
+
+**Avoid single-word triggers.** A trigger like `"database"` matches too broadly and will fire the skill on unrelated messages. Two-to-five words is the right size.
+
+**Write from the user's perspective, not the developer's.** Think about what someone would actually type, not how you would name the feature:
+
+```markdown
+## Triggers
+
+# Too generic — will match unrelated messages
+- "database"
+- "query"
+- "performance"
+
+# Too narrow — covers only one exact phrasing
+- "optimize my PostgreSQL query execution plan"
+
+# Good — diverse, natural, varied length
+- "optimize database queries"
+- "my queries are slow"
+- "speed up database performance"
+- "SQL performance tuning"
+- "why is my database slow"
+- "improve query speed"
+```
+
+**If a skill isn't matching when it should**, add more trigger phrases covering the vocabulary the user actually used. This is almost always faster than adjusting `minScore`.
+
+---
+
+## Writing Effective Examples
+
+The `## Examples` section is never auto-injected. It's loaded on-demand when the agent calls `skill.read` — making it the right place for reference material that's useful sometimes, not always.
+
+**Structure as input/output pairs, not prose.** The model applies examples as patterns. Prose descriptions of what good output looks like are much weaker than showing the actual output:
+
+```markdown
+## Examples
+
+### Input
+
+A PR that adds a new authentication endpoint with no tests.
+
+### Output
+
+**Security**: The endpoint accepts `role` from the request body — never trust client-supplied role values. Derive the role from the authenticated session instead.
+
+**Tests**: No tests for the new endpoint. Add at minimum: happy path, missing auth token (401), and invalid role (403).
+
+**Naming**: `createUserSession` is clearer than `doLogin`.
+
+---
+
+### Input
+
+A React component that fetches user data in a `useEffect` with no error handling.
+
+### Output
+
+**Error handling**: The fetch has no error state. If the request fails, the component renders stale or empty data silently. Add an `error` state and a fallback UI.
+
+**Performance**: Missing dependency array on `useEffect` — add `[userId]` to avoid fetching on every render.
+```
+
+Use `---` to separate examples so the model can clearly tell where one ends and the next begins.
+
+**Keep examples generalisable.** An example about a specific auth module causes the model to apply auth-specific framing to unrelated code. Use generic scenarios that illustrate the *structure* of good output, not a specific domain.
+
+**Tell the agent when to load them.** The examples section is only useful if the agent knows to reach for it. Add a cue at the end of your instructions:
+
+```markdown
+## Instructions
+
+When reviewing code:
+1. Check for security vulnerabilities first
+2. Verify test coverage exists
+3. Flag naming inconsistencies
+4. Be constructive — suggest improvements, not just problems
+5. Format feedback as inline comments where possible
+
+For complex reviews or unfamiliar codebases, load the examples section first:
+skill.read("code-review", "examples")
+```
+
+**When the agent should load examples:**
+- The task is complex and the instructions leave room for interpretation
+- The user asks "show me an example" or "how would you handle X"
+- The skill is being used for the first time in a session
+
+---
+
 ## Best Practices
 
-1. **Keep instructions concise.** The 2000-character limit exists for a reason — instructions that are too long dilute focus. If a skill needs more space, split it into two targeted skills.
+1. **Keep instructions focused.** The 5000-character limit gives plenty of room — but longer isn't better. Instructions that are too long dilute the model's attention. If a skill is growing large, split it into two targeted skills.
 
-2. **Write specific triggers.** BM25 matching works best when triggers are representative of the exact phrases users send. Include short forms, long forms, and common misspellings.
+2. **Write 5–8 diverse triggers.** Cover synonyms, short forms, long forms, and the vocabulary your users actually reach for. See [Writing Effective Triggers](#writing-effective-triggers) above. The validator will warn if you have fewer than 3.
 
 3. **Use the description for context, not instructions.** The description is only used for indexing. Write it as a sentence explaining when this skill applies, not what the agent should do.
 
@@ -226,6 +344,8 @@ See the [Skill Tools reference](/tools/skills) for full parameter details.
 5. **Use `onValidationError: 'warn'` during development.** Switch to `'fail'` before deploying to production so invalid skills never silently slip through.
 
 6. **Set `minScore` deliberately.** A threshold of `0.3` works well for general use. Raise it if unrelated skills are injecting too often; lower it if relevant skills are being missed.
+
+7. **Write examples as input/output pairs, not prose.** Narrative descriptions of good output are far weaker than showing the actual output. See [Writing Effective Examples](#writing-effective-examples) above. Always tell the agent at the end of your instructions when to call `skill.read` to load them.
 
 ---
 

@@ -84,8 +84,11 @@ interface AgentDelegationConfig {
    * Delegation mode.
    *
    * 'await' (default) — injects delegate_to_agent: calls the sub-agent,
-   * waits for its result, and returns it to the LLM. Use when the orchestrator
-   * needs to relay or act on the sub-agent's response.
+   * waits for its result, and returns it to the LLM wrapped with a
+   * "[Response from <agent> — task complete]" label so the orchestrator
+   * can clearly distinguish a finished sub-agent result from a live
+   * conversation message. Use when the orchestrator needs to relay or
+   * act on the sub-agent's response.
    *
    * 'forget' — injects delegate_and_forget: fires the sub-agent without
    * waiting for its result and returns { status: 'delegated' } immediately.

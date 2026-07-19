@@ -1,19 +1,24 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-async function fetchLatestNpmVersion(): Promise<string> {
+function getLocalVersion(): string {
   try {
-    const res = await fetch('https://registry.npmjs.org/toolpack-sdk/latest');
-    const data = await res.json() as { version: string };
-    return data.version;
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const pkg = JSON.parse(
+      readFileSync(resolve(__dirname, '../packages/toolpack-sdk/package.json'), 'utf-8')
+    ) as { version: string };
+    return pkg.version;
   } catch {
     return '';
   }
 }
 
 export default async function createConfig(): Promise<Config> {
-  const version = await fetchLatestNpmVersion();
+  const version = getLocalVersion();
 
   return {
     title: 'Toolpack SDK – TypeScript SDK for Production AI Agents',

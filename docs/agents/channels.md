@@ -181,7 +181,90 @@ const telegram = new TelegramChannel({
 
 - On startup, calls `getMe` to populate `botUserId` and `botUsername`.
 - Supports both polling (development) and webhook (production) modes.
-- Sends text messages via the Telegram Bot API.
+- Sends text messages (and optional inline keyboard buttons) via the Telegram Bot API.
+- Handles inline keyboard button taps (`callback_query` updates) as first-class input.
+
+### Inline keyboards (callback queries)
+
+**Sending a message with inline buttons:**
+
+Pass `metadata.replyMarkup` in the `AgentOutput` to attach an `InlineKeyboardMarkup`-shaped object to any message. Existing callers that omit `replyMarkup` are unaffected.
+
+```typescript
+await channel.send({
+  output: 'Approve this trade?',
+  metadata: {
+    chatId: 123456789,
+    replyMarkup: {
+      inline_keyboard: [[
+        { text: '✅ Approve', callback_data: 'approve:abc-123' },
+        { text: '❌ Reject',  callback_data: 'reject:abc-123'  },
+      ]],
+    },
+  },
+});
+```
+
+**Receiving a button tap:**
+
+When a user taps an inline button, Telegram sends a `callback_query` update. `normalize()` handles this as a distinct path and sets `context.isCallback = true`:
+
+```typescript
+// Input from a button tap:
+// input.message        → 'approve:abc-123'   (the callback_data)
+// input.conversationId → '555'               (the chat.id as string)
+// input.context.isCallback     → true
+// input.context.callbackQueryId → 'cbq-1'   (needed for answerCallbackQuery)
+// input.context.callbackData   → 'approve:abc-123'
+// input.context.chatId         → 555
+// input.context.userId         → 987654321
+```
+
+**Dismissing the loading spinner:**
+
+After handling a button tap, call `answerCallbackQuery()` to dismiss Telegram's loading spinner. This is **not** called automatically — the consuming agent is responsible.
+
+```typescript
+async invokeAgent(input: AgentInput): Promise<AgentResult> {
+  if (input.context?.isCallback) {
+    const data = input.context.callbackData as string;
+
+    // Handle the tap
+    const result = await this.handleTap(data);
+
+    // Dismiss the spinner — pass callbackQueryId from context
+    await (this.channels[0] as TelegramChannel).answerCallbackQuery(
+      input.context.callbackQueryId as string,
+      'Recorded.',
+    );
+
+    return result;
+  }
+  return this.run(input.message ?? '');
+}
+```
+
+**`answerCallbackQuery(callbackQueryId, text?)`**
+
+| Parameter | Type | Description |
+|---|---|---|
+| `callbackQueryId` | `string` | `callback_query.id` from the update — available as `input.context.callbackQueryId` |
+| `text` | `string` (optional) | Short toast text shown to the user (max 200 chars) |
+
+Throws if the Telegram API returns an error (e.g. query expired).
+
+**Callback context fields**
+
+| Field | Type | Description |
+|---|---|---|
+| `isCallback` | `true` | Always set on callback_query inputs |
+| `callbackQueryId` | `string` | Pass to `answerCallbackQuery()` to dismiss the spinner |
+| `callbackData` | `string` | The `callback_data` value from the tapped button |
+| `chatId` | `number` | Numeric chat ID |
+| `userId` | `number` | Numeric user ID of who tapped the button |
+| `username` | `string \| undefined` | Telegram username |
+| `firstName` | `string \| undefined` | User's first name |
+| `messageId` | `number` | The message that contained the keyboard |
 
 ### Telegram bot setup
 
