@@ -56,6 +56,7 @@ const toolpack = await Toolpack.init({
 | `allowedTools` | string[] | Specific tools to allow |
 | `blockedTools` | string[] | Specific tools to block |
 | `blockAllTools` | boolean | Block all tools entirely |
+| `rulesDir` | string | Root directory for rule files. Auto-discovers `__global__/` (all modes) and `<mode-name>/` (this mode). Defaults to `.toolpack/rules`. See [Rules](/guides/rules). |
 | `baseContext` | object | Context injection settings |
 | `workflow` | object | Workflow configuration |
 
@@ -112,6 +113,31 @@ const codeReviewMode: ModeConfig = {
     blockAllTools: false,
 };
 ```
+
+### Agent Mode with Rules
+
+Combine tool restrictions with always-on behavioral constraints:
+
+```typescript
+const equityAnalystMode = createMode({
+    name: 'equity-analyst',
+    displayName: 'Equity Analyst',
+    systemPrompt: 'You are an Indian equity market analyst.',
+    allowedToolCategories: ['network', 'filesystem'],
+    blockedTools: ['exec.run', 'exec.run_shell'],
+    rulesDir: '.warren/rules',  // loads __global__/ and equity-analyst/ subfolders
+});
+```
+
+```
+.warren/rules/
+  __global__/
+    compliance.md     ← all modes
+  equity-analyst/
+    india-only.md     ← this mode only
+```
+
+See [Rules](/guides/rules) for the full guide.
 
 ## Registering Modes at Runtime
 

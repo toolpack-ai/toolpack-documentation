@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
         'guides/multimodal',
         'guides/structured-output',
         'guides/skills',
+        'guides/rules',
         'guides/hitl-confirmation',
         'guides/mcp-server',
       ],
@@ -84,6 +85,8 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Release Notes',
       items: [
+        'releases/v2.7.0',
+        'releases/v2.6.0',
         'releases/v2.5.0',
         'releases/v2.4.0',
         'releases/v2.3.0',
