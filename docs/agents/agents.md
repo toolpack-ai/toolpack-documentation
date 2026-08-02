@@ -481,6 +481,59 @@ class MyResearcher extends ResearchAgent {
 
 ---
 
+## Stopping Agents
+
+Every `AgentInput` accepts an optional `signal?: AbortSignal`. Passing one lets you cancel an in-flight agent run from outside — for example, when a user clicks a stop button in your UI.
+
+```typescript
+const controller = new AbortController();
+
+const resultPromise = agent.invokeAgent({
+  message: 'Do something long-running',
+  signal: controller.signal,
+});
+
+// Cancel at any time:
+controller.abort();
+
+const result = await resultPromise;
+```
+
+### In a web server
+
+```typescript
+const activeRuns = new Map<string, AbortController>();
+
+app.post('/api/chat', async (req, res) => {
+  const { sessionId, message } = req.body;
+  const controller = new AbortController();
+  activeRuns.set(sessionId, controller);
+
+  const result = await agent.invokeAgent({ message, signal: controller.signal });
+  activeRuns.delete(sessionId);
+  res.json(result);
+});
+
+app.post('/api/chat/stop', (req, res) => {
+  const controller = activeRuns.get(req.body.sessionId);
+  if (controller) {
+    controller.abort();
+    activeRuns.delete(req.body.sessionId);
+  }
+  res.json({ ok: true });
+});
+```
+
+### Signal propagation through delegation
+
+The abort signal is automatically passed into any sub-agents spawned via `delegate_to_agent` or `delegate_and_forget`. Aborting the root agent stops the entire delegation chain — you do not need to wire the signal manually through each agent.
+
+:::note Limitation
+The signal fires at **tool-round boundaries**, not mid-execution. A tool call that is already running (including a delegation) finishes its current step before the abort is observed. This is standard cooperative-cancellation behavior with `AbortSignal`.
+:::
+
+---
+
 ## WorkflowStep shape
 
 When Toolpack returns a structured plan, `run()` extracts steps and includes them in `AgentResult.steps`:

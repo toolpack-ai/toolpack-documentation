@@ -26,24 +26,36 @@ interface ToolpackInitConfig {
     provider?: string;           // 'openai' | 'anthropic' | 'gemini' | 'ollama'
     apiKey?: string;             // API key for the provider
     model?: string;              // Default model
-    
+
     // Multi-provider
     providers?: Record<string, ProviderOptions>;
     defaultProvider?: string;
-    
+
     // Custom providers
     customProviders?: ProviderAdapter[] | Record<string, ProviderAdapter>;
-    
+
     // Tools
     tools?: boolean;             // Enable built-in tools
-    customTools?: ToolProject[]; // Custom tool projects
-    
+    toolsConfig?: Partial<ToolsConfig>; // Global tool behavior (maxToolRounds, etc.)
+
     // Modes
     customModes?: ModeConfig[];  // Custom modes
     defaultMode?: string;        // Default mode name
-    modeOverrides?: Record<string, { systemPrompt?: string }>;
+
+    // Logging
+    logging?: LoggingConfig;     // File logging settings
+
+    // HITL
+    hitl?: HitlConfig;           // Human-in-the-loop confirmation settings
+    onToolConfirm?: ToolConfirmCallback; // Confirmation handler (also enables HITL)
 }
 ```
+
+:::note Removed in v2.8
+`customTools` — use `ModeConfig.customTools` per agent instead.  
+`modeOverrides` — configure modes directly via `customModes` / `registerMode()`.  
+`configPath` — all configuration is now passed inline to `Toolpack.init()`.
+:::
 
 ### Methods
 
@@ -294,7 +306,7 @@ Context passed to custom tools during execution.
 ```typescript
 interface ToolContext {
     workspaceRoot: string;
-    config: Record<string, any>; // from toolpack.config.json
+    config: Record<string, any>; // from toolsConfig.additionalConfigurations
     log: (msg: string) => void;
 }
 ```

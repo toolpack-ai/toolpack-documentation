@@ -372,10 +372,8 @@ const channel = new ScheduledChannel({
 });
 
 // Expose scheduler tools so the LLM can manage its own schedule
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  customTools: [createSchedulerTools(store)],
-});
+const toolpack = await Toolpack.init({ provider: 'anthropic' });
+await toolpack.loadToolProject(createSchedulerTools(store));
 ```
 
 The agent can then call four scheduler tools:

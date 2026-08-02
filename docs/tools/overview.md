@@ -119,16 +119,18 @@ const safeMode: ModeConfig = {
 
 ## Tool Configuration
 
-Configure tool behavior in `toolpack.config.json`:
+Configure tool behavior via `toolsConfig` in `Toolpack.init()`:
 
-```json
-{
-    "tools": {
-        "enabled": true,
-        "autoExecute": true,
-        "maxToolRounds": 10
-    }
-}
+```typescript
+const sdk = await Toolpack.init({
+    provider: 'openai',
+    tools: true,
+    toolsConfig: {
+        enabled: true,
+        autoExecute: true,
+        maxToolRounds: 10,
+    },
+});
 ```
 
 See [Configuration](/reference/configuration) for all options.

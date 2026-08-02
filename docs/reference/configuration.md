@@ -1,98 +1,56 @@
 ---
 sidebar_position: 1
-description: "Complete configuration reference for Toolpack SDK. Configure tools, logging, modes, system prompts, and environment variables via toolpack.config.json or programmatically."
-keywords: [Toolpack SDK configuration, toolpack.config.json, environment variables, API key config, logging config, mode overrides, SDK settings]
+description: "Complete configuration reference for Toolpack SDK. Configure tools, logging, HITL, and environment variables via Toolpack.init()."
+keywords: [Toolpack SDK configuration, environment variables, API key config, logging config, toolsConfig, hitl, SDK settings]
 ---
 
 # Configuration
 
-Toolpack SDK supports a hierarchical configuration system with multiple layers.
+All Toolpack SDK configuration is passed directly to `Toolpack.init()`. There is no file-based config discovery — settings are explicit code.
 
-## Configuration Hierarchy
-
-Configuration is loaded and merged in the following priority order (highest priority first):
-
-| Priority | Location | Description |
-|----------|----------|-------------|
-| 1 (highest) | `.toolpack/config/toolpack.config.json` | Workspace-local config |
-| 2 | `~/.toolpack/config/toolpack.config.json` | Global user config |
-| 3 (lowest) | `toolpack.config.json` | Project root config |
-
-Values from higher-priority configs override lower-priority ones. Objects are deep-merged, arrays are replaced.
-
-### Example
-
-```
-~/.toolpack/config/toolpack.config.json (global)
-{
-    "tools": { "enabled": true, "maxToolRounds": 5 }
-}
-
-.toolpack/config/toolpack.config.json (local)
-{
-    "tools": { "maxToolRounds": 20 }
-}
-
-# Result: tools.enabled = true, tools.maxToolRounds = 20
-```
-
-## Configuration File
-
-Create `toolpack.config.json` in your project root (or use the hierarchy above):
-
-```json
-{
-    "systemPrompt": "You are a helpful coding assistant.",
-    "baseContext": true,
-    "tools": {
-        "enabled": true,
-        "autoExecute": true,
-        "maxToolRounds": 10
-    },
-    "logging": {
-        "enabled": false,
-        "level": "info"
-    }
-}
-```
-
-## Top-Level Options
+## Toolpack.init() Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `systemPrompt` | string | - | Custom system prompt for all requests |
-| `baseContext` | boolean | true | Include working directory and tool info in context |
-| `disableBaseContext` | boolean | false | Disable base context injection |
-| `modeOverrides` | object | - | Override system prompts per mode |
-| `logging` | object | - | Logging configuration |
+| `provider` | string | — | Single provider shorthand (`'openai'`, `'anthropic'`, `'gemini'`, etc.) |
+| `apiKey` | string | — | API key override (defaults to env var) |
+| `model` | string | — | Default model name |
+| `tools` | boolean | `false` | Enable built-in tools |
+| `toolsConfig` | `Partial<ToolsConfig>` | `{}` | Tool behavior overrides |
+| `customModes` | `ModeConfig[]` | `[]` | Additional modes to register |
+| `defaultMode` | string | `'default'` | Mode to activate on init |
+| `logging` | `LoggingConfig` | — | File logging settings |
+| `hitl` | `HitlConfig` | — | Human-in-the-loop confirmation |
+| `onToolConfirm` | callback | — | Confirmation handler (also enables HITL) |
+| `contextWindow` | `ContextWindowConfig` | — | Automatic conversation pruning/summarization |
 
 ## Tools Configuration
 
-```json
-{
-    "tools": {
-        "enabled": true,
-        "autoExecute": true,
-        "maxToolRounds": 10,
-        "toolChoicePolicy": "auto",
-        "enabledTools": [],
-        "enabledToolCategories": [],
-        "intelligentToolDetection": {
-            "enabled": false,
-            "maxFollowUpMessages": 5
+Pass `toolsConfig` to `Toolpack.init()`:
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'openai',
+    tools: true,
+    toolsConfig: {
+        enabled: true,
+        autoExecute: true,
+        maxToolRounds: 10,
+        toolChoicePolicy: 'auto',
+        enabledTools: [],
+        enabledToolCategories: [],
+        toolSearch: {
+            enabled: false,
+            alwaysLoadedTools: [],
+            alwaysLoadedCategories: [],
+            searchResultLimit: 5,
+            cacheDiscoveredTools: true,
         },
-        "toolSearch": {
-            "enabled": false,
-            "alwaysLoadedTools": [],
-            "alwaysLoadedCategories": [],
-            "searchResultLimit": 5,
-            "cacheDiscoveredTools": true
+        additionalConfigurations: {
+            MY_CUSTOM_API_KEY: process.env.MY_CUSTOM_API_KEY,
         },
-        "additionalConfigurations": {
-            "MY_CUSTOM_API_KEY": "123456"
-        }
-    }
-}
+    },
+});
 ```
 
 ### Tools Options
@@ -121,82 +79,52 @@ Create `toolpack.config.json` in your project root (or use the hierarchy above):
 | `database` | Database operations |
 | `cloud` | Cloud deployment |
 
-### Intelligent Tool Detection
-
-When enabled, the SDK analyzes conversation context to decide if tools are needed:
-
-```json
-{
-    "tools": {
-        "intelligentToolDetection": {
-            "enabled": true,
-            "maxFollowUpMessages": 5
-        }
-    }
-}
-```
-
 ### Tool Search
 
 For large tool sets, enable on-demand tool discovery:
 
-```json
-{
-    "tools": {
-        "toolSearch": {
-            "enabled": true,
-            "alwaysLoadedTools": ["fs.read_file", "exec.run"],
-            "alwaysLoadedCategories": ["filesystem"],
-            "searchResultLimit": 5,
-            "cacheDiscoveredTools": true
-        }
-    }
+```typescript
+toolsConfig: {
+    toolSearch: {
+        enabled: true,
+        alwaysLoadedTools: ['fs.read_file', 'exec.run'],
+        alwaysLoadedCategories: ['filesystem'],
+        searchResultLimit: 5,
+        cacheDiscoveredTools: true,
+    },
 }
 ```
 
 ## Logging Configuration
 
-```json
-{
-    "logging": {
-        "enabled": true,
-        "filePath": "./toolpack-sdk.log",
-        "verbose": true
-    }
-}
+Pass `logging` to `Toolpack.init()`:
+
+```typescript
+const toolpack = await Toolpack.init({
+    provider: 'openai',
+    logging: {
+        enabled: true,
+        filePath: './toolpack-sdk.log',
+        level: 'debug',
+        console: false,
+    },
+});
 ```
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `enabled` | boolean | false | Enable file logging |
-| `filePath` | string | `./toolpack-sdk.log` | Log file path |
+| `enabled` | boolean | `false` | Enable file logging |
+| `filePath` | string | `toolpack-sdk.log` | Log file path (relative to CWD) |
 | `level` | string | `info` | Log level (`error`, `warn`, `info`, `debug`, `trace`) |
+| `console` | boolean | `false` | Mirror log output to console |
 
-You can also enable logging via environment variables:
+Environment variables override programmatic config (highest precedence):
 
 ```bash
-# Set a log file path (also enables logging)
-export TOOLPACK_SDK_LOG_FILE="./toolpack-sdk.log"
-
-# Override log level
+export TOOLPACK_SDK_LOG_FILE="./toolpack-sdk.log"   # also enables logging
 export TOOLPACK_SDK_LOG_LEVEL="debug"
-```
-
-## Mode Overrides
-
-Override system prompts for specific modes:
-
-```json
-{
-    "modeOverrides": {
-        "agent": {
-            "systemPrompt": "You are a careful coding assistant. Always explain before making changes."
-        },
-        "chat": {
-            "systemPrompt": "You are a friendly research assistant."
-        }
-    }
-}
+export TOOLPACK_SDK_LOG_ENABLED="true"
+export TOOLPACK_SDK_LOG_CONSOLE="true"
 ```
 
 ## Environment Variables
@@ -253,7 +181,7 @@ const toolpack = await Toolpack.init({
 
 ## maxToolRounds in AgentRunOptions
 
-`AgentRunOptions.maxToolRounds` sets a per-run hard cap on the number of tool-call rounds the agent may execute. It overrides the `tools.maxToolRounds` value in `toolpack.config.json` and bypasses the query-classifier adjustment for that specific run.
+`AgentRunOptions.maxToolRounds` sets a per-run hard cap on the number of tool-call rounds the agent may execute. It overrides the `toolsConfig.maxToolRounds` value from `Toolpack.init()` and bypasses the query-classifier adjustment for that specific run.
 
 ```typescript
 // In your BaseAgent subclass:
@@ -289,21 +217,23 @@ await toolpack.generate({
 
 ---
 
-## Programmatic Configuration
-
-All options can also be set programmatically:
+## Full Example
 
 ```typescript
 const toolpack = await Toolpack.init({
     provider: 'openai',
-    apiKey: 'sk-...',
+    apiKey: process.env.OPENAI_API_KEY,
     model: 'gpt-4o',
     tools: true,
+    toolsConfig: {
+        maxToolRounds: 10,
+        additionalConfigurations: { MY_API_KEY: process.env.MY_API_KEY },
+    },
+    logging: { enabled: true, filePath: './toolpack.log', level: 'debug' },
+    hitl: { enabled: true, confirmationMode: 'all' },
+    onToolConfirm: async (tool) => askUser(`Allow ${tool.displayName}?`),
     customModes: [...],
     defaultMode: 'agent',
-    modeOverrides: {
-        agent: { systemPrompt: '...' }
-    },
 });
 ```
 

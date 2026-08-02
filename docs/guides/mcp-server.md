@@ -55,11 +55,8 @@ const mcpConfig = {
 
 const mcpTools = await createMcpToolProject(mcpConfig);
 
-const sdk = await Toolpack.init({
-  provider: 'openai',
-  tools: true,
-  customTools: [mcpTools],
-});
+const sdk = await Toolpack.init({ provider: 'openai', tools: true });
+await sdk.loadToolProject(mcpTools);
 ```
 
 ### Configuration Options
@@ -120,9 +117,9 @@ const fileMode = createMode({
 const sdk = await Toolpack.init({
   provider: 'openai',
   tools: true,
-  customTools: [mcpTools],
-  modes: [fileMode],
+  customModes: [fileMode],
 });
+await sdk.loadToolProject(mcpTools);
 ```
 
 ### Error Handling
@@ -180,9 +177,9 @@ Enable detailed logging to troubleshoot MCP issues:
 const sdk = await Toolpack.init({
   provider: 'openai',
   tools: true,
-  customTools: [mcpTools],
-  logLevel: 'debug',
+  logging: { enabled: true, level: 'debug', console: true },
 });
+await sdk.loadToolProject(mcpTools);
 ```
 
 ---
@@ -301,8 +298,8 @@ When `searchMode: true`, `tools/list` returns only `tool.search` instead of all 
 const sdk = await Toolpack.init({
   provider: 'anthropic',
   tools: true,
-  modeOverrides: {
-    default: { toolSearch: { enabled: true } },
+  toolsConfig: {
+    toolSearch: { enabled: true },
   },
 });
 

@@ -26,15 +26,17 @@ Pair `createSkillTools` with `createSkillInterceptor` so that skills created at 
 ```typescript
 import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
 
+const skillTools = createSkillTools({ dir: '.toolpack/skills' });
+
 const toolpack = await Toolpack.init({
   provider: 'anthropic',
   interceptors: [
     createSkillInterceptor({ dir: '.toolpack/skills' }),
   ],
-  customTools: [
-    createSkillTools({ dir: '.toolpack/skills' }),
-  ],
 });
+
+// Attach skill tools per agent via ModeConfig.customTools:
+// agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
 ```
 
 Both functions must point to the same `dir`.

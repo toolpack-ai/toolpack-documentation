@@ -54,8 +54,8 @@ const store = new SchedulerStore({ dbPath: './scheduler.db' });
 const toolpack = await Toolpack.init({
   provider: 'anthropic',
   tools: true,
-  customTools: [createSchedulerTools(store)],
 });
+await toolpack.loadToolProject(createSchedulerTools(store));
 
 // 3. Wire the store into a ScheduledChannel
 const channel = new ScheduledChannel({ name: 'dynamic', store });
@@ -293,16 +293,13 @@ import { createSchedulerTools } from '@toolpack-sdk/agents';
 createSchedulerTools(store: SchedulerStore): ToolProject
 ```
 
-Returns a `ToolProject` containing four scheduler tools. Register it as `customTools` when initialising Toolpack so the LLM can manage its own schedule.
+Returns a `ToolProject` containing four scheduler tools. Load it via `loadToolProject()` so the LLM can manage its own schedule.
 
 ```typescript
 const store = new SchedulerStore({ dbPath: './scheduler.db' });
 
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  tools: true,
-  customTools: [createSchedulerTools(store)],
-});
+const toolpack = await Toolpack.init({ provider: 'anthropic', tools: true });
+await toolpack.loadToolProject(createSchedulerTools(store));
 ```
 
 ### scheduler.create

@@ -13,15 +13,17 @@ The skills system lets you define **reusable behavioral instructions** in Markdo
 ```typescript
 import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
 
+const skillTools = createSkillTools({ dir: '.toolpack/skills' });
+
 const toolpack = await Toolpack.init({
   provider: 'anthropic',
   interceptors: [
     createSkillInterceptor({ dir: '.toolpack/skills', maxSkills: 3, minScore: 0.3 }),
   ],
-  customTools: [
-    createSkillTools({ dir: '.toolpack/skills' }),
-  ],
 });
+
+// Attach skill tools per agent via ModeConfig.customTools:
+// agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
 ```
 
 Create your first skill at `.toolpack/skills/code-review.skill.md`:
@@ -200,15 +202,17 @@ The interceptor validates all `.skill.md` files eagerly at `Toolpack.init()` tim
 ```typescript
 import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
 
+const skillTools = createSkillTools({ dir: '.toolpack/skills' });
+
 const toolpack = await Toolpack.init({
   provider: 'anthropic',
   interceptors: [
     createSkillInterceptor({ dir: '.toolpack/skills' }),
   ],
-  customTools: [
-    createSkillTools({ dir: '.toolpack/skills' }),
-  ],
 });
+
+// Attach skill tools per agent via ModeConfig.customTools:
+// agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
 ```
 
 Both functions should point to the same `dir` so that skills created via `skill.create` are immediately visible to the interceptor.

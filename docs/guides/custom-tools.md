@@ -52,7 +52,7 @@ When your `execute` function runs, Toolpack passes a `ToolContext` object (`ctx`
 | Property | Type | Description |
 |-----------|------|-------------|
 | `workspaceRoot` | `string` | Absolute path to the current process working directory (where the agent is running). |
-| `config` | `Record<string, any>` | Variables dynamically loaded from your `toolpack.config.json` under `tools.additionalConfigurations`. |
+| `config` | `Record<string, any>` | Values from `toolsConfig.additionalConfigurations` passed to `Toolpack.init()`. |
 | `log` | `(msg: string) => void` | Writes directly to `toolpack-sdk.log` with a specific `[Tool]` prefix format for tracing |
 
 ---
@@ -83,9 +83,9 @@ The factory guarantees your tools are correctly namespaced, descriptions are pro
 
 ## 3. Registering the Custom Tools
 
-### A. Initialization Time
+### A. Per-agent via ModeConfig
 
-You can pass tools directly at initialization via the `customTools` array:
+Attach tools to a specific agent by setting `customTools` on the mode. This scopes the tools to that agent only and never leaks them globally:
 
 ```typescript
 import { Toolpack } from 'toolpack-sdk';
@@ -94,13 +94,22 @@ import { acmeToolsProject } from './my-tools';
 const sdk = await Toolpack.init({
     provider: 'openai',
     tools: true, // Loads builtins
-    customTools: [acmeToolsProject], // Injects your tools!
+});
+
+// Set on your agent class:
+// this.mode = { ...this.mode, customTools: [...acmeToolsProject.tools] };
+
+// Or inline per-request:
+const result = await sdk.generate({
+    messages: [{ role: 'user', content: 'Search the Acme database for...' }],
+    model: 'gpt-4.1',
+    mode: { ...sdk.getMode()!, customTools: [...acmeToolsProject.tools] },
 });
 ```
 
-### B. Runtime Injection
+### B. Runtime Injection (Global)
 
-If you discover plugins or dynamically fetch scripts during runtime, you can load them on the fly:
+If you need tools available globally across all requests, load them dynamically at runtime:
 
 ```typescript
 // Assuming `sdk` is an initialized Toolpack instance
@@ -115,17 +124,18 @@ console.log("Dynamically loaded tools into registry.");
 
 A huge advantage of `ToolContext` is passing configuration API Keys (like a Datadog key, Acme API key) dynamically into tools.
 
-Inside your `toolpack.config.json`:
+Pass them via `toolsConfig.additionalConfigurations` in `Toolpack.init()`:
 
-```json
-{
-  "tools": {
-    "enabled": true,
-    "additionalConfigurations": {
-      "ACME_API_TOKEN": "super-secret-token"
-    }
-  }
-}
+```typescript
+const sdk = await Toolpack.init({
+    provider: 'openai',
+    tools: true,
+    toolsConfig: {
+        additionalConfigurations: {
+            ACME_API_TOKEN: process.env.ACME_API_TOKEN,
+        },
+    },
+});
 ```
 
 In your tool execution:

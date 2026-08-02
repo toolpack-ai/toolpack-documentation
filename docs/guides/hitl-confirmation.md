@@ -19,37 +19,39 @@ HITL confirmation allows you to:
 
 ## Configuration
 
-HITL is configured in your `toolpack.config.json` file under the `hitl` section.
+HITL is configured by passing a `hitl` object (and an `onToolConfirm` callback) to `Toolpack.init()`.
 
 ### Basic Configuration
 
-```json
-{
-  "hitl": {
-    "enabled": true,
-    "confirmationMode": "all",
-    "bypass": {
-      "tools": [],
-      "categories": [],
-      "levels": []
-    }
-  }
-}
+```typescript
+const sdk = await Toolpack.init({
+  provider: 'openai',
+  hitl: {
+    enabled: true,
+    confirmationMode: 'all',
+    bypass: {
+      tools: [],
+      categories: [],
+      levels: [],
+    },
+  },
+  onToolConfirm: async (tool, args) => {
+    // Return 'allow', 'deny', or 'cancel'
+    const answer = await askUser(`Run ${tool.displayName}?`);
+    return answer;
+  },
+});
 ```
 
 ### Configuration Options
 
 #### `enabled` (boolean)
-- **Default**: `true`
+- **Default**: `false` (auto-enabled when `onToolConfirm` is provided)
 - Master switch for HITL confirmation
 - When `false`, all tools bypass confirmation
 
-```json
-{
-  "hitl": {
-    "enabled": false  // Disable all confirmations
-  }
-}
+```typescript
+hitl: { enabled: false }  // Disable all confirmations explicitly
 ```
 
 #### `confirmationMode` (string)
@@ -62,47 +64,31 @@ HITL is configured in your `toolpack.config.json` file under the `hitl` section.
 | `"high-only"` | Only confirm high-risk operations |
 | `"all"` | Confirm both high and medium risk operations |
 
-```json
-{
-  "hitl": {
-    "confirmationMode": "high-only"  // Only confirm high-risk tools
-  }
-}
+```typescript
+hitl: { confirmationMode: 'high-only' }  // Only confirm high-risk tools
 ```
 
 #### `bypass` (object)
 Configure which tools, categories, or risk levels should skip confirmation.
 
 **Bypass by Tool Name:**
-```json
-{
-  "hitl": {
-    "bypass": {
-      "tools": ["fs.write_file", "fs.delete_file"]
-    }
-  }
+```typescript
+hitl: {
+  bypass: { tools: ['fs.write_file', 'fs.delete_file'] }
 }
 ```
 
 **Bypass by Category:**
-```json
-{
-  "hitl": {
-    "bypass": {
-      "categories": ["filesystem", "execution"]
-    }
-  }
+```typescript
+hitl: {
+  bypass: { categories: ['filesystem', 'execution'] }
 }
 ```
 
 **Bypass by Risk Level:**
-```json
-{
-  "hitl": {
-    "bypass": {
-      "levels": ["medium"]  // Only bypass medium-risk tools
-    }
-  }
+```typescript
+hitl: {
+  bypass: { levels: ['medium'] }  // Only bypass medium-risk tools
 }
 ```
 
@@ -179,18 +165,11 @@ await addBypassRule({
   value: 'medium'
 });
 
-// Specify custom config path
-await addBypassRule({
-  type: 'tool',
-  value: 'fs.delete_file',
-  configPath: '/path/to/toolpack.config.json'
-});
 ```
 
 **Parameters:**
 - `type`: `'tool'` | `'category'` | `'level'`
 - `value`: The tool name, category, or risk level to bypass
-- `configPath` (optional): Path to config file (auto-discovered if not provided)
 
 **Returns:** `Promise<void>`
 
@@ -239,9 +218,6 @@ await addBypassRule({ type: 'tool', value: 'fs.write_file' });
 toolpack.reloadConfig();
 ```
 
-**Parameters:**
-- `configPath` (optional): Path to config file to reload
-
 **Returns:** `void`
 
 ## Best Practices
@@ -250,26 +226,19 @@ toolpack.reloadConfig();
 
 Begin with all confirmations enabled and add bypass rules only for operations you trust:
 
-```json
-{
-  "hitl": {
-    "enabled": true,
-    "confirmationMode": "all"
-  }
-}
+```typescript
+hitl: { enabled: true, confirmationMode: 'all' }
 ```
 
 ### 2. Use Category Bypasses Carefully
 
 Bypassing entire categories can skip many tools. Prefer specific tool bypasses:
 
-```json
-{
-  "hitl": {
-    "bypass": {
-      "tools": ["fs.write_file"]  // ✅ Specific
-      // "categories": ["filesystem"]  // ⚠️ Too broad
-    }
+```typescript
+hitl: {
+  bypass: {
+    tools: ['fs.write_file'],  // ✅ Specific
+    // categories: ['filesystem'],  // ⚠️ Too broad
   }
 }
 ```
@@ -278,14 +247,10 @@ Bypassing entire categories can skip many tools. Prefer specific tool bypasses:
 
 For production environments, avoid bypassing high-risk operations:
 
-```json
-{
-  "hitl": {
-    "confirmationMode": "high-only",  // Always confirm high-risk
-    "bypass": {
-      "levels": ["medium"]  // Only bypass medium-risk
-    }
-  }
+```typescript
+hitl: {
+  confirmationMode: 'high-only',  // Always confirm high-risk
+  bypass: { levels: ['medium'] }, // Only bypass medium-risk
 }
 ```
 
@@ -293,12 +258,8 @@ For production environments, avoid bypassing high-risk operations:
 
 During development, you may want to skip medium-risk confirmations:
 
-```json
-{
-  "hitl": {
-    "confirmationMode": "high-only"
-  }
-}
+```typescript
+hitl: { confirmationMode: 'high-only' }
 ```
 
 ## Examples
@@ -307,74 +268,66 @@ During development, you may want to skip medium-risk confirmations:
 
 Allow all filesystem operations but confirm commands:
 
-```json
-{
-  "hitl": {
-    "enabled": true,
-    "confirmationMode": "all",
-    "bypass": {
-      "categories": ["filesystem"]
-    }
-  }
-}
+```typescript
+const sdk = await Toolpack.init({
+  provider: 'openai',
+  hitl: {
+    enabled: true,
+    confirmationMode: 'all',
+    bypass: { categories: ['filesystem'] },
+  },
+  onToolConfirm: myConfirmHandler,
+});
 ```
 
 ### Example 2: Production Environment
 
 Confirm all high-risk operations, bypass medium-risk:
 
-```json
-{
-  "hitl": {
-    "enabled": true,
-    "confirmationMode": "high-only"
-  }
-}
+```typescript
+const sdk = await Toolpack.init({
+  provider: 'openai',
+  hitl: { enabled: true, confirmationMode: 'high-only' },
+  onToolConfirm: myConfirmHandler,
+});
 ```
 
 ### Example 3: Trusted Automation
 
 Bypass specific tools for automated workflows:
 
-```json
-{
-  "hitl": {
-    "enabled": true,
-    "bypass": {
-      "tools": [
-        "fs.write_file",
-        "git.commit",
-        "db.insert"
-      ]
-    }
-  }
-}
+```typescript
+const sdk = await Toolpack.init({
+  provider: 'openai',
+  hitl: {
+    enabled: true,
+    bypass: { tools: ['fs.write_file', 'git.commit', 'db.insert'] },
+  },
+  onToolConfirm: myConfirmHandler,
+});
 ```
 
-### Example 4: Programmatic Control
+### Example 4: Programmatic Bypass at Runtime
 
 ```typescript
 import { Toolpack, addBypassRule } from 'toolpack-sdk';
 
 const toolpack = await Toolpack.init({
   provider: 'openai',
-  apiKey: process.env.OPENAI_API_KEY,
-  configPath: './toolpack.config.json'
-});
+  hitl: { enabled: true, confirmationMode: 'all' },
+  onToolConfirm: async (tool, args) => {
+    console.log(`Confirm ${tool.displayName}?`);
+    const response = await getUserInput(); // Your custom prompt
 
-// Set up custom confirmation handler
-toolpack.getClient().onToolConfirm = async (tool, args) => {
-  console.log(`Confirm ${tool.displayName}?`);
-  const response = await getUserInput(); // Your custom prompt
-  
-  if (response === 'always') {
-    await addBypassRule({ type: 'tool', value: tool.name });
-    toolpack.reloadConfig();
-    return 'allow';
-  }
-  
-  return response; // 'allow', 'deny', or 'cancel'
-};
+    if (response === 'always') {
+      await addBypassRule({ type: 'tool', value: tool.name });
+      toolpack.reloadConfig();
+      return 'allow';
+    }
+
+    return response; // 'allow', 'deny', or 'cancel'
+  },
+});
 ```
 
 ## Troubleshooting
@@ -382,37 +335,21 @@ toolpack.getClient().onToolConfirm = async (tool, args) => {
 ### Bypass Rules Not Working
 
 1. **Check tool name format**: Use `tool.name` (e.g., `"fs.write_file"`), not `tool.displayName` (e.g., `"Write File"`)
-2. **Reload config**: Call `toolpack.reloadConfig()` after modifying the config file
+2. **Reload config**: Call `toolpack.reloadConfig()` after modifying bypass rules programmatically
 3. **Verify enabled state**: Ensure `hitl.enabled` is not explicitly set to `false`
 
 ### All Tools Bypassing
 
 Check if HITL is disabled:
 
-```json
-{
-  "hitl": {
-    "enabled": false  // ❌ This disables all confirmations
-  }
-}
+```typescript
+hitl: { enabled: false }  // ❌ This disables all confirmations
 ```
 
 Or if confirmation mode is off:
 
-```json
-{
-  "hitl": {
-    "confirmationMode": "off"  // ❌ This also disables all confirmations
-  }
-}
-```
-
-### Config Changes Not Applying
-
-After modifying the config file, reload it:
-
 ```typescript
-toolpack.reloadConfig('/path/to/toolpack.config.json');
+hitl: { confirmationMode: 'off' }  // ❌ This also disables all confirmations
 ```
 
 ## Related
