@@ -17,6 +17,7 @@ All Toolpack SDK configuration is passed directly to `Toolpack.init()`. There is
 | `model` | string | — | Default model name |
 | `tools` | boolean | `false` | Enable built-in tools |
 | `toolsConfig` | `Partial<ToolsConfig>` | `{}` | Tool behavior overrides |
+| `toolOverrides` | `ToolProject[]` | — | Projects loaded after built-ins; same name replaces the built-in |
 | `customModes` | `ModeConfig[]` | `[]` | Additional modes to register |
 | `defaultMode` | string | `'default'` | Mode to activate on init |
 | `logging` | `LoggingConfig` | — | File logging settings |
@@ -72,7 +73,10 @@ const toolpack = await Toolpack.init({
 | `filesystem` | File system operations |
 | `execution` | Command execution |
 | `system` | System information |
-| `network` | HTTP and web tools |
+| `http` | HTTP request tools |
+| `web` | Web search, fetch, scrape, and related tools |
+| `github` | GitHub GraphQL/REST tools |
+| `slack` | Slack Web API tools |
 | `coding` | Code analysis tools |
 | `version-control` | Git operations |
 | `diff` | Diff and patch tools |

@@ -6,7 +6,7 @@ keywords: [web scraping tools, web search, Tavily search, Brave search, DuckDuck
 
 # Web Tools
 
-Category: `network` · 9 tools
+Category: `web` · 9 tools
 
 Search the web, scrape content, and extract information from websites.
 

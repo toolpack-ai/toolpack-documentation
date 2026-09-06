@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 description: "Learn how to build and load custom tools in Toolpack SDK using createToolProject. Extend AI agents with domain-specific tools that integrate with the SDK's context and logging system."
 keywords: [custom tools, createToolProject, Toolpack SDK, AI tools, tool development, custom AI tools, TypeScript tools]
 ---
@@ -114,8 +114,22 @@ If you need tools available globally across all requests, load them dynamically 
 ```typescript
 // Assuming `sdk` is an initialized Toolpack instance
 await sdk.loadToolProject(dynamicToolProject);
+// Or several at once (single BM25 reindex):
+await sdk.loadToolProjects([projectA, projectB]);
 
 console.log("Dynamically loaded tools into registry.");
+```
+
+### C. Override Built-ins at Init
+
+Pass `toolOverrides` to replace same-named built-in tools after built-ins load:
+
+```typescript
+const sdk = await Toolpack.init({
+    provider: 'openai',
+    tools: true,
+    toolOverrides: [acmeToolsProject], // same tool name wins over the built-in
+});
 ```
 
 ---

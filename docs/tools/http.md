@@ -6,7 +6,7 @@ keywords: [HTTP tools, API requests, REST API, GET POST PUT DELETE, file downloa
 
 # HTTP Tools
 
-Category: `network` · 5 tools
+Category: `http` · 5 tools
 
 Make HTTP requests to APIs and download files.
 

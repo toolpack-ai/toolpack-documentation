@@ -1,7 +1,7 @@
 ---
-sidebar_position: 1
-description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, JSON, SQLite, PostgreSQL, and web sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, and streaming ingestion."
-keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, WebUrlSource, ApiDataSource, JSONSource, SQLiteSource, PostgresSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder, VertexAI embedder, OpenRouter embedder]
+sidebar_position: 13
+description: "Learn how to use the @toolpack-sdk/knowledge package for RAG (Retrieval-Augmented Generation) with your AI agents. Set up knowledge bases from Markdown, text, JSON, SQLite, PostgreSQL, and web sources with vector embeddings. Includes web crawling, API data ingestion, hybrid search, streaming ingestion, and incremental add/delete."
+keywords: [knowledge, RAG, retrieval, embeddings, vector search, knowledge base, MemoryProvider, PersistentKnowledgeProvider, MarkdownSource, TextSource, WebUrlSource, ApiDataSource, JSONSource, SQLiteSource, PostgresSource, hybrid search, streaming ingestion, OpenAI embedder, Ollama embedder, VertexAI embedder, OpenRouter embedder]
 ---
 
 # Knowledge Package
@@ -120,6 +120,26 @@ const source = new MarkdownSource('./docs/**/*.md', {
 - YAML frontmatter extraction
 - Code block detection (`hasCode: true` metadata)
 - Deterministic chunk IDs for deduplication
+
+### TextSource
+
+Chunk plain text with optional metadata — useful for platform or tenant knowledge items:
+
+```typescript
+import { TextSource } from '@toolpack-sdk/knowledge';
+
+const source = new TextSource('item-abc', documentBody, {
+  maxChunkSize: 2000,
+  chunkOverlap: 200,
+  namespace: 'tenant-knowledge',
+  metadata: { knowledge_item_id: 'abc', tenant_id: 't1' },
+});
+```
+
+**Features:**
+- Token-aware chunking with optional overlap
+- Deterministic chunk IDs (`namespace:name:index:hash`)
+- Custom metadata merged into every chunk
 
 ### WebUrlSource
 
@@ -524,7 +544,7 @@ const results = await kb.query('authentication setup', {
 
 ## Utility Functions
 
-The package exports two utility functions for building custom search pipelines:
+The package exports utility functions for building custom search and filter pipelines:
 
 ### keywordSearch
 
@@ -548,7 +568,15 @@ const combined = combineScores(semanticScore, keywordScore, semanticWeight);
 // Returns: semanticScore * semanticWeight + keywordScore * (1 - semanticWeight)
 ```
 
-Use these functions when implementing custom hybrid search logic outside of `hybridQuery`.
+### matchesFilter
+
+```typescript
+import { matchesFilter } from '@toolpack-sdk/knowledge';
+
+matchesFilter(chunk.metadata, { knowledge_item_id: 'abc' });
+```
+
+Use these functions when implementing custom hybrid search or metadata filtering outside of `hybridQuery` / `deleteWhere`.
 
 ## Streaming Ingestion
 
@@ -628,6 +656,8 @@ interface KnowledgeOptions {
   onError?: ErrorHandler;
   onSync?: SyncEventHandler;
   onEmbeddingProgress?: EmbeddingProgressHandler;
+  onAdd?: KnowledgeAddHandler;      // After add()
+  onDelete?: KnowledgeDeleteHandler; // After delete() / deleteWhere()
 }
 ```
 
@@ -651,6 +681,16 @@ interface HybridQueryOptions extends QueryOptions {
   semanticWeight?: number;    // Weight for semantic matching (default: 0.7)
   keywordFields?: string[];   // Fields to search (default: ['content'])
 }
+```
+
+#### add(content, metadata?) / ingest(source) / delete(ids) / deleteWhere(filter)
+Incremental updates without a full re-sync:
+
+```typescript
+await kb.add(content, metadata);                 // Embed + store one chunk
+await kb.ingest(source);                         // Add source chunks without clearing
+await kb.delete([id]);                           // Delete by IDs
+await kb.deleteWhere({ knowledge_item_id: 'abc' }); // Delete by metadata match
 ```
 
 #### sync()

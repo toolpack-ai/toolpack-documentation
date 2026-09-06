@@ -1,5 +1,5 @@
 ---
-sidebar_position: 11
+sidebar_position: 12
 description: "Learn how to use the Rules system in Toolpack SDK — define always-on behavioral constraints in Markdown files, auto-discovered by mode name and shared __global__ folder."
 keywords: [rules, agent rules, rulesDir, behavioral constraints, guardrails, createMode, Toolpack SDK rules]
 ---

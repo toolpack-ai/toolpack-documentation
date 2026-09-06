@@ -7,7 +7,7 @@ keywords: [slack tools, Slack Web API, post message, channel history, thread rep
 
 # Slack Tools
 
-Category: `network` · 6 tools
+Category: `slack` · 6 tools
 
 Slack Web API tools — post messages, reply in threads, react to messages, read channel history, read thread replies, and verify bot identity.
 

@@ -7,7 +7,7 @@ keywords: [github tools, GitHub API, pull request review, GraphQL, PR diff, PR f
 
 # GitHub Tools
 
-Category: `network` · 9 tools
+Category: `github` · 9 tools
 
 GitHub GraphQL/REST tools for PR threads, comments, and contents.
 

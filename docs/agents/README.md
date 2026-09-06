@@ -84,9 +84,12 @@ keywords: [agents, AI agents, BaseAgent, channels, interceptors, conversation hi
 npm install @toolpack-sdk/agents toolpack-sdk
 ```
 
-Peer dependencies are optional — install only what you need:
+Requires `toolpack-sdk` `^3.1.0`. Other peer dependencies are optional — install only what you need:
 
 ```bash
+# Knowledge / RAG (optional)
+npm install @toolpack-sdk/knowledge
+
 # Slack (SlackChannel uses a built-in HTTP server, but @slack/web-api is needed for auth.test)
 npm install @slack/web-api
 

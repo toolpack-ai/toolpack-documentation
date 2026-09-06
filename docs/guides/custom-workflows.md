@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 description: "Create custom workflows in Toolpack SDK. Use workflow presets or build custom configurations with planning prompts and parallel tool execution."
 keywords: [custom workflows, workflow presets, planning prompts, AI workflow customization, plan-direct execution, Toolpack SDK workflows]
 ---

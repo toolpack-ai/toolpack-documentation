@@ -1,5 +1,5 @@
 ---
-sidebar_position: 14
+sidebar_position: 15
 sidebar_label: 'Skills'
 description: "Toolpack SDK skill tools for creating, reading, updating, and listing behavioral skill files at runtime via LLM-callable tools."
 keywords: [skill tools, skill.create, skill.read, skill.update, skill.list, behavioral skills, skill.md, Toolpack SDK skills]
@@ -19,27 +19,16 @@ LLM-callable tools for managing the skill library at runtime — create, read, u
 import { createSkillTools } from 'toolpack-sdk';
 ```
 
-### Wire up with Toolpack
-
-Pair `createSkillTools` with `createSkillInterceptor` so that skills created at runtime are immediately picked up by the interceptor:
+### Wire up with an agent
 
 ```typescript
-import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
+import { createSkillTools } from 'toolpack-sdk';
 
 const skillTools = createSkillTools({ dir: '.toolpack/skills' });
-
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  interceptors: [
-    createSkillInterceptor({ dir: '.toolpack/skills' }),
-  ],
-});
 
 // Attach skill tools per agent via ModeConfig.customTools:
 // agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
 ```
-
-Both functions must point to the same `dir`.
 
 ## Tools
 
@@ -68,7 +57,7 @@ Write a new `.skill.md` file to the skills directory. The file name is derived f
 
 ### `skill.read`
 
-Read a skill file by name. When `section` is omitted the full file content is returned. Use this to inspect a skill before updating it, or to load the `examples` section (which is never auto-injected by the interceptor).
+Read a skill file by name. When `section` is omitted the full file content is returned. Use this to inspect a skill before updating it, or to load the `examples` section (which is never returned automatically — only on an explicit `skill.read` call).
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -154,4 +143,4 @@ const stream = toolpack.stream({
 
 ## Related
 
-- [Skills Guide](/guides/skills) — Full guide covering the `.skill.md` format, interceptor setup, BM25 details, and best practices
+- [Skills Guide](/guides/skills) — Full guide covering the `.skill.md` format, BM25 details, and best practices

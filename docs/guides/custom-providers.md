@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 description: "Create custom AI provider adapters for Toolpack SDK. Implement the ProviderAdapter interface to integrate any LLM service with streaming and tool calling support."
 keywords: [custom AI provider, ProviderAdapter, custom LLM integration, Toolpack SDK provider, AI provider adapter, xAI integration]
 ---

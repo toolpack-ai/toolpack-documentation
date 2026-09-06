@@ -1,5 +1,5 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 description: "Learn about Toolpack SDK workflows. Use direct execution for simple tasks or plan-direct workflows for complex AI operations with parallel tool orchestration."
 keywords: [AI workflows, plan-direct execution, workflow engine, AI task planning, parallel tools, Toolpack SDK workflows]
 ---

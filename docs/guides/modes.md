@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 description: "Learn about Agent and Chat modes in Toolpack SDK. Agent mode provides full tool access, while Chat mode restricts to web-only. Switch modes dynamically at runtime."
 keywords: [AI modes, agent mode, chat mode, tool access control, Toolpack SDK modes, AI assistant modes]
 ---

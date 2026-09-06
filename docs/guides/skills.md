@@ -1,26 +1,19 @@
 ---
-sidebar_position: 10
-description: "Learn how to use the Skills module in Toolpack SDK — define reusable behavioral instructions in .skill.md files, auto-inject them via BM25 search, and manage the skill library at runtime with LLM-callable tools."
-keywords: [skills, skill interceptor, createSkillInterceptor, createSkillTools, BM25, behavioral instructions, skill.md, Toolpack SDK skills]
+sidebar_position: 11
+description: "Learn how to use the Skills module in Toolpack SDK — define reusable behavioral instructions in .skill.md files and manage the skill library at runtime with LLM-callable tools."
+keywords: [skills, createSkillTools, BM25, behavioral instructions, skill.md, Toolpack SDK skills]
 ---
 
 # Skills
 
-The skills system lets you define **reusable behavioral instructions** in Markdown files and automatically inject them into agent requests based on message relevance. Skills require zero agent code changes — add a `.skill.md` file to your skills directory and the interceptor handles the rest.
+The skills system lets you define **reusable behavioral instructions** in Markdown files and expose them to the agent at runtime via LLM-callable tools. The agent can create, read, update, and list `.skill.md` files from within a session.
 
 ## Quick Start
 
 ```typescript
-import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
+import { createSkillTools } from 'toolpack-sdk';
 
 const skillTools = createSkillTools({ dir: '.toolpack/skills' });
-
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  interceptors: [
-    createSkillInterceptor({ dir: '.toolpack/skills', maxSkills: 3, minScore: 0.3 }),
-  ],
-});
 
 // Attach skill tools per agent via ModeConfig.customTools:
 // agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
@@ -74,7 +67,7 @@ A PR that adds a password reset endpoint with no rate limiting.
 **Naming**: `resetUserPwd` → `resetPassword` — avoid abbreviations in public-facing method names.
 ```
 
-Now when a user sends a message like "review this PR", the interceptor automatically injects the code-review instructions before the LLM sees the message.
+Now when the agent needs to apply code-review behaviour, it calls `skill.read("code-review")` and the instructions are returned in the tool response for the LLM to act on.
 
 ---
 
@@ -100,7 +93,7 @@ updated: 2026-01-15T10:00:00.000Z  # Optional. ISO 8601 timestamp.
 |---------|---------|-----------|-------|
 | `## Description` | Used for BM25 indexing. Not visible to the LLM. | No | 300 chars |
 | `## Triggers` | Example phrases used for BM25 indexing. Not visible to the LLM. | No | 1–10 triggers, 100 chars each |
-| `## Instructions` | Appended to the system prompt (or a new system message is created if none exists). | **Yes — system prompt** | 5000 chars |
+| `## Instructions` | Returned to the LLM via `skill.read`. | **Yes — via `skill.read`** | 5000 chars |
 | `## Examples` | Loaded on-demand via `skill.read`. Never auto-injected. | No | 3000 chars |
 
 ### Character Limits
@@ -134,65 +127,6 @@ Skills can be organized in subdirectories. The folder name becomes the skill's `
 
 ---
 
-## The Skill Interceptor
-
-`createSkillInterceptor` registers an SDK-level interceptor that runs before every `Toolpack.generate()` call. It performs BM25 search on the last 3 user messages and injects matching skill instructions into the system prompt.
-
-### Setup
-
-```typescript
-import { Toolpack, createSkillInterceptor } from 'toolpack-sdk';
-
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  interceptors: [
-    createSkillInterceptor({
-      dir: '.toolpack/skills',
-      maxSkills: 3,
-      minScore: 0.3,
-      onValidationError: 'fail',
-    }),
-  ],
-});
-```
-
-### Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `dir` | string | `.toolpack/skills` | Path to the skill files directory |
-| `maxSkills` | number | `3` | Maximum number of skills injected per message |
-| `minScore` | number | `0.3` | BM25 relevance threshold. Skills scoring below this are ignored |
-| `onValidationError` | `'fail'` \| `'warn'` | `'fail'` | How to handle invalid `.skill.md` files at startup |
-
-### Activation Flow
-
-1. A message arrives and `Toolpack.generate()` is called.
-2. The interceptor builds a query from the last 3 user messages — short follow-ups gain meaning from earlier turns in the same thread.
-3. BM25 searches all skill files using weighted fields:
-   - Name and title — weight ×3
-   - Tags and triggers — weight ×2
-   - Description — weight ×1
-4. Skills scoring above `minScore` are selected (up to `maxSkills`).
-5. Their `## Instructions` sections are appended to the system prompt as a `<skill-instructions>` XML block (or a new system message is created at position 0 if none exists).
-6. The LLM runs with behavioral instructions already in context.
-
-### Startup Validation
-
-The interceptor validates all `.skill.md` files eagerly at `Toolpack.init()` time — not lazily on the first message.
-
-**`'fail'` mode (default):** Any invalid file throws at startup with a clear error listing the file and exactly what is wrong. The process refuses to start.
-
-**`'warn'` mode:** Invalid skills are skipped and logged to stderr. Valid skills load normally.
-
-### BM25 Index
-
-- Built in-memory at startup — no external dependency.
-- Automatically reindexes when any `.skill.md` file's mtime changes.
-- Worst-case context cost: `maxSkills(3) × instructions_limit(5000 chars) = 15000 chars`.
-
----
-
 ## The Skill Tools
 
 `createSkillTools` registers four LLM-callable tools that let the agent manage the skill library at runtime. This is useful for agents that refine their own behaviors or help users create new skills.
@@ -200,22 +134,13 @@ The interceptor validates all `.skill.md` files eagerly at `Toolpack.init()` tim
 ### Setup
 
 ```typescript
-import { Toolpack, createSkillInterceptor, createSkillTools } from 'toolpack-sdk';
+import { createSkillTools } from 'toolpack-sdk';
 
 const skillTools = createSkillTools({ dir: '.toolpack/skills' });
-
-const toolpack = await Toolpack.init({
-  provider: 'anthropic',
-  interceptors: [
-    createSkillInterceptor({ dir: '.toolpack/skills' }),
-  ],
-});
 
 // Attach skill tools per agent via ModeConfig.customTools:
 // agent.mode = { ...agentMode, customTools: [...skillTools.tools] };
 ```
-
-Both functions should point to the same `dir` so that skills created via `skill.create` are immediately visible to the interceptor.
 
 ### Available Tools
 
@@ -270,7 +195,7 @@ Triggers are the most important part of a skill. BM25 is a keyword search — it
 - "improve query speed"
 ```
 
-**If a skill isn't matching when it should**, add more trigger phrases covering the vocabulary the user actually used. This is almost always faster than adjusting `minScore`.
+**If a skill isn't being used when it should**, add more trigger phrases covering the vocabulary the user actually used.
 
 ---
 
@@ -345,11 +270,7 @@ skill.read("code-review", "examples")
 
 4. **Organize by category.** Use subdirectories (`coding/`, `communication/`) to group related skills. The directory name becomes a filterable `category` field.
 
-5. **Use `onValidationError: 'warn'` during development.** Switch to `'fail'` before deploying to production so invalid skills never silently slip through.
-
-6. **Set `minScore` deliberately.** A threshold of `0.3` works well for general use. Raise it if unrelated skills are injecting too often; lower it if relevant skills are being missed.
-
-7. **Write examples as input/output pairs, not prose.** Narrative descriptions of good output are far weaker than showing the actual output. See [Writing Effective Examples](#writing-effective-examples) above. Always tell the agent at the end of your instructions when to call `skill.read` to load them.
+5. **Write examples as input/output pairs, not prose.** Narrative descriptions of good output are far weaker than showing the actual output. See [Writing Effective Examples](#writing-effective-examples) above. Always tell the agent at the end of your instructions when to call `skill.read` to load them.
 
 ---
 

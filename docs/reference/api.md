@@ -37,6 +37,7 @@ interface ToolpackInitConfig {
     // Tools
     tools?: boolean;             // Enable built-in tools
     toolsConfig?: Partial<ToolsConfig>; // Global tool behavior (maxToolRounds, etc.)
+    toolOverrides?: ToolProject[]; // Replace built-ins by name (loaded after built-ins)
 
     // Modes
     customModes?: ModeConfig[];  // Custom modes
@@ -51,7 +52,7 @@ interface ToolpackInitConfig {
 }
 ```
 
-:::note Removed in v2.8
+:::note Removed in v3.0.0
 `customTools` — use `ModeConfig.customTools` per agent instead.  
 `modeOverrides` — configure modes directly via `customModes` / `registerMode()`.  
 `configPath` — all configuration is now passed inline to `Toolpack.init()`.
@@ -121,14 +122,45 @@ Get the current provider adapter.
 const provider = toolpack.getProvider();
 ```
 
-#### loadToolProject()
+#### loadToolProject() / loadToolProjects()
 
-Load a custom tool project dynamically at runtime.
+Load custom tool projects dynamically at runtime. Prefer `loadToolProjects()` when registering several projects — the BM25 tool-search index rebuilds once at the end.
 
 ```typescript
 import { myCustomTools } from './my-tools';
 
 await toolpack.loadToolProject(myCustomTools);
+await toolpack.loadToolProjects([projectA, projectB]);
+```
+
+To replace built-ins by name at init time, pass `toolOverrides` to `Toolpack.init()` instead.
+
+#### loadRequestToolProject() / registerRequestTools()
+
+Register tools that bypass mode filtering entirely and are always passed to the model regardless of `allowedToolCategories`. This is the same mechanism used internally by knowledge and mind tools.
+
+Use `loadRequestToolProject()` when you have a `ToolProject` (the usual case), or `registerRequestTools()` when you have a plain `RequestToolDefinition[]`.
+
+```typescript
+import { RequestToolDefinition } from 'toolpack-sdk';
+
+// From a ToolProject:
+toolpack.loadRequestToolProject(myProject);
+
+// From raw definitions:
+const tools: RequestToolDefinition[] = [{ name: 'my_tool', ... }];
+toolpack.registerRequestTools(tools);
+```
+
+Tools registered this way are deduplicated by name — registering the same name twice replaces the existing entry.
+
+#### searchTools() / getRegisteredToolNames()
+
+Inspect registered tools (useful in tests):
+
+```typescript
+const { found, tools } = toolpack.searchTools('http get', 'http');
+const names = toolpack.getRegisteredToolNames();
 ```
 
 #### listProviders()

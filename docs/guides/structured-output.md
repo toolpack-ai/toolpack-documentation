@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 description: "Use Zod schemas with Toolpack SDK's response_format to get fully-typed structured output from any provider. response.data is inferred automatically from your schema."
 keywords: [structured output, Zod, response_format, typed output, JSON schema, Toolpack SDK]
 ---

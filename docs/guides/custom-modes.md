@@ -1,5 +1,5 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 description: "Create custom AI modes in Toolpack SDK. Define tool access patterns, blocked categories, system prompts, and workflow configuration for specialized AI behavior."
 keywords: [custom AI modes, tool access control, mode configuration, Toolpack SDK custom mode, createMode, AI behavior control]
 ---
@@ -69,7 +69,10 @@ Use these category names in `allowedToolCategories` or `blockedToolCategories`:
 | `filesystem` | fs.read_file, fs.write_file, fs.list_dir, etc. |
 | `execution` | exec.run, exec.run_shell, exec.run_background, etc. |
 | `system` | system.info, system.env, system.cwd, etc. |
-| `network` | http.get, http.post, web.search, web.scrape, etc. |
+| `http` | http.get, http.post, http.put, http.delete, http.download |
+| `web` | web.search, web.fetch, web.scrape, web.extract_links, etc. |
+| `github` | github.* GraphQL/REST tools |
+| `slack` | slack.* messaging and history tools |
 | `coding` | coding.find_symbol, coding.get_imports, etc. |
 | `version-control` | git.status, git.diff, git.commit, etc. |
 | `diff` | diff.create, diff.apply, diff.preview |
@@ -88,7 +91,7 @@ const webResearchMode: ModeConfig = {
     displayName: 'Web Research',
     description: 'Web search and scraping only',
     systemPrompt: 'You are a research assistant. You can search and scrape the web, but cannot access local files or execute commands.',
-    allowedToolCategories: ['network'],
+    allowedToolCategories: ['http', 'web'],
     blockedToolCategories: [],
     allowedTools: [],
     blockedTools: [],
@@ -123,7 +126,7 @@ const equityAnalystMode = createMode({
     name: 'equity-analyst',
     displayName: 'Equity Analyst',
     systemPrompt: 'You are an Indian equity market analyst.',
-    allowedToolCategories: ['network', 'filesystem'],
+    allowedToolCategories: ['http', 'web', 'filesystem'],
     blockedTools: ['exec.run', 'exec.run_shell'],
     rulesDir: '.warren/rules',  // loads __global__/ and equity-analyst/ subfolders
 });

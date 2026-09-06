@@ -18,9 +18,9 @@ keywords: [Toolpack SDK, TypeScript AI SDK, production AI agents, AI agent frame
 ## Why Toolpack SDK?
 
 - **Production-Ready Agents** - Build agents that run on Slack, Discord, Telegram, SMS, Email, Webhook, scheduled jobs, and MCP — 8 channel integrations out of the box
-- **100+ Built-in Tools** - File system, Kubernetes, command execution, web scraping, GitHub, database, diff, cloud, and more across 12 categories
+- **100+ Built-in Tools** - File system, Kubernetes, command execution, web scraping, GitHub, database, diff, cloud, and more across 14 categories
 - **AgentMind Cognitive Layer** - Persistent goals, beliefs, and reflections that survive across runs — the only TypeScript SDK with a built-in cognitive memory model
-- **Knowledge / RAG** - Web crawling, REST API ingestion, hybrid semantic + keyword search, and streaming indexing across 6 source types
+- **Knowledge / RAG** - Web crawling, REST API ingestion, hybrid semantic + keyword search, and streaming indexing across 7 source types
 - **Multi-Provider** - OpenAI, Anthropic, Gemini, Ollama, OpenRouter — switch with one line, no vendor lock-in
 - **Workflow Engine** - Automatic planning and step-by-step execution for complex multi-tool tasks
 - **Extensible at Every Layer** - Custom tools, channels, provider adapters, agents, modes, and interceptors — if Toolpack doesn't have it built in, you can build it in using the same interfaces the built-in components use
@@ -52,7 +52,7 @@ for await (const chunk of stream) {
 | Feature | Description |
 |---------|-------------|
 | **Providers** | OpenAI, Anthropic, Gemini, Ollama + custom providers |
-| **Tools** | 100+ built-in tools across 12 categories |
+| **Tools** | 100+ built-in tools across 14 categories |
 | **Modes** | Agent (full access), Coding (development-focused), Chat (web-only), or custom |
 | **Workflows** | Direct execution or planned step-by-step |
 | **Streaming** | Real-time token streaming with tool execution |

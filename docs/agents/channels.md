@@ -1,8 +1,8 @@
 ---
 sidebar_position: 5
 sidebar_label: Channels
-description: "Connect agents to Slack, Telegram, Discord, Email, SMS, Webhook, ScheduledChannel, and McpChannel. Two-way vs trigger-only channels and configuration options."
-keywords: [SlackChannel, TelegramChannel, DiscordChannel, EmailChannel, SMSChannel, WebhookChannel, ScheduledChannel, McpChannel, MCP]
+description: "Connect agents to Slack, Telegram, Discord, Email, SMS, Webhook, Chat, ScheduledChannel, and McpChannel. Two-way vs trigger-only channels and configuration options."
+keywords: [ChatChannel, SlackChannel, TelegramChannel, DiscordChannel, EmailChannel, SMSChannel, WebhookChannel, ScheduledChannel, McpChannel, MCP]
 ---
 
 # Channels — Connecting Agents to External Systems
@@ -13,6 +13,7 @@ Channels normalise incoming events into `AgentInput` and deliver `AgentOutput` b
 
 - [ChannelInterface](#channelinterface)
 - [Trigger vs. conversation channels](#trigger-vs-conversation-channels)
+- [ChatChannel](#chatchannel)
 - [SlackChannel](#slackchannel)
 - [DiscordChannel](#discordchannel)
 - [TelegramChannel](#telegramchannel)
@@ -271,6 +272,55 @@ Throws if the Telegram API returns an error (e.g. query expired).
 1. Message `@BotFather` on Telegram
 2. Run `/newbot` and follow the prompts
 3. Copy the token → `TELEGRAM_BOT_TOKEN`
+
+---
+
+## ChatChannel
+
+Lightweight channel for in-app UI conversations. The request/response cycle is synchronous: `send()` and `listen()` are no-ops and the agent reply is returned directly from the HTTP handler.
+
+### Configuration
+
+Declare the channel on the agent's `channels` property:
+
+```typescript
+import { BaseAgent, ChatChannel } from '@toolpack-sdk/agents';
+
+class MyAgent extends BaseAgent {
+  name = 'my-agent';
+  mode = 'agent';
+  channels = [new ChatChannel({ name: 'chat' })];
+
+  async invokeAgent(input: AgentInput): Promise<AgentResult> {
+    return this.run(input.message ?? '', undefined, { conversationId: input.conversationId }, input.attachments);
+  }
+}
+```
+
+### Request format
+
+In your HTTP handler, call `chat.normalize()` to parse and validate the request body, then pass the result to `agent.invokeAgent()`:
+
+```typescript
+const chat = agent.channels[0] as ChatChannel;
+
+app.post('/api/chat', async (req, res) => {
+  const input = chat.normalize(req.body);     // validates attachments, parses fields
+  const output = await agent.invokeAgent(input);
+  res.json(output);
+});
+```
+
+Expected JSON body fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `message` | string | User message text |
+| `conversationId` | string | Optional. Continues an existing conversation thread |
+| `attachments` | `Array<ImagePart \| FilePart>` | Optional. Images or documents to attach |
+| `participant` | `Participant` | Optional. Identifies the user |
+
+Attachment validation runs at `normalize()` time. For `FilePart`, the size limit is enforced only when `size` is provided in the attachment object — if omitted, no client-side check runs. For inline `image_data`, the decoded size is always checked.
 
 ---
 

@@ -1,12 +1,12 @@
 ---
-sidebar_position: 8
-description: "Send images to AI models with Toolpack SDK. Support for file paths, base64 data, and URLs across OpenAI, Anthropic, Gemini, and Ollama."
-keywords: [multimodal AI, vision AI, image input, GPT-4 vision, Claude vision, Gemini vision, Toolpack SDK multimodal]
+sidebar_position: 9
+description: "Send images and files to AI models with Toolpack SDK. Support for file paths, base64 data, URLs, and document files across OpenAI, Anthropic, Gemini, and Ollama."
+keywords: [multimodal AI, vision AI, image input, file input, FilePart, GPT-4 vision, Claude vision, Gemini vision, Toolpack SDK multimodal]
 ---
 
 # Multimodal Support
 
-Toolpack SDK supports multimodal inputs (text + images) across all vision-capable providers. You can send images alongside text prompts to models like GPT-4o, Claude Sonnet, Gemini Pro Vision, and LLaVA.
+Toolpack SDK supports multimodal inputs (text + images + files) across all vision-capable providers. You can send images and documents alongside text prompts to models like GPT-4o, Claude Sonnet, Gemini Pro Vision, and LLaVA.
 
 ## Image Input Formats
 
@@ -115,24 +115,84 @@ Different providers handle image inputs differently. The SDK normalizes this aut
 - **URLs** are passed directly to OpenAI, but downloaded and converted for other providers
 - **Detail level** controls image resolution/token usage (OpenAI-specific, ignored by others)
 
+## File Attachments (Documents)
+
+Use `FilePart` to attach non-image files such as PDFs or spreadsheets. Pass a public or pre-signed URL and the MIME type:
+
+```typescript
+import { FilePart } from 'toolpack-sdk';
+
+const pdfPart: FilePart = {
+    type: 'file',
+    file: {
+        url: 'https://example.com/report.pdf',
+        mimeType: 'application/pdf',
+        name: 'report.pdf',  // optional, display only
+        size: 204800,        // optional, bytes — used for client-side limit checks
+    },
+};
+
+const response = await toolpack.generate({
+    messages: [{
+        role: 'user',
+        content: [
+            { type: 'text', text: 'Summarise this document' },
+            pdfPart,
+        ]
+    }],
+    model: 'claude-sonnet-5',
+});
+```
+
+A data URI (`data:<mime>;base64,<data>`) is also accepted in `file.url` for inline embedding.
+
+### Size Limits
+
+```typescript
+import { FILE_LIMITS } from 'toolpack-sdk';
+
+// FILE_LIMITS.image.maxBytes    → 10 MB
+// FILE_LIMITS.document.maxBytes → 10 MB
+// FILE_LIMITS.document.maxPages → 20 pages
+```
+
+`BaseChannel.validateAttachments()` is a protected helper that channel implementations call inside `normalize()` (e.g. `ChatChannel` does this). For `FilePart`, it checks against the limit only if `size` is supplied — if omitted, no client-side check runs. For inline base64 images (`image_data`), the limit is always checked against the estimated decoded byte size.
+
+### Provider support for file attachments
+
+| Provider | URL | Inline base64 (`data:` URI) |
+|----------|-----|-----------------------------|
+| **Anthropic** | ✓ images and documents | ✓ auto-routed to `image` or `document` block |
+| **Anthropic Vertex** | ✓ | ✓ |
+| **Gemini** | ✓ (`fileData`) | ✓ (`inlineData`) |
+| **VertexAI** | ✓ (`fileData`) | ✓ (`inlineData`) |
+| **OpenAI** | ✓ images and documents | Images only (non-image base64 is dropped) |
+
+---
+
 ## TypeScript Types
 
 ```typescript
-import { ImageFilePart, ImageDataPart, ImageUrlPart } from 'toolpack-sdk';
+import { ImageFilePart, ImageDataPart, ImageUrlPart, FilePart } from 'toolpack-sdk';
 
-const filePart: ImageFilePart = {
+const imagePath: ImageFilePart = {
     type: 'image_file',
     image_file: { path: '/path/to/image.png', detail: 'high' }
 };
 
-const dataPart: ImageDataPart = {
+const imageData: ImageDataPart = {
     type: 'image_data',
     image_data: { data: 'base64...', mimeType: 'image/png', detail: 'auto' }
 };
 
-const urlPart: ImageUrlPart = {
+const imageUrl: ImageUrlPart = {
     type: 'image_url',
     image_url: { url: 'https://example.com/image.png', detail: 'low' }
+};
+
+const doc: FilePart = {
+    type: 'file',
+    file: { url: 'https://example.com/doc.pdf', mimeType: 'application/pdf' }
 };
 ```
 
