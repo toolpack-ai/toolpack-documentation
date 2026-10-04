@@ -241,6 +241,15 @@ interface AgentResult {
 }
 ```
 
+`run()` sets `metadata.mindSaveError` when the reply was produced but what the agent learned could not be saved to its mind. The run still succeeds and the reply is kept:
+
+```typescript
+const result = await this.run(input.message);
+if (result.metadata?.mindSaveError) {
+  console.warn('Reply kept, memory not saved:', result.metadata.mindSaveError);
+}
+```
+
 ### Routing by intent
 
 Use TypeScript generics to get compile-time intent safety:
@@ -305,6 +314,12 @@ protected async run(
   options?: AgentRunOptions,
   context?: { conversationId?: string },
 ): Promise<AgentResult>
+```
+
+Pass `onChunk` in `options` to receive each text delta as it is generated (the run then uses streaming; the returned `AgentResult` is unchanged):
+
+```typescript
+const result = await this.run(input.message, { onChunk: (delta) => process.stdout.write(delta) });
 ```
 
 ### Passing a conversationId explicitly

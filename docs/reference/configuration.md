@@ -24,6 +24,8 @@ All Toolpack SDK configuration is passed directly to `Toolpack.init()`. There is
 | `hitl` | `HitlConfig` | — | Human-in-the-loop confirmation |
 | `onToolConfirm` | callback | — | Confirmation handler (also enables HITL) |
 | `contextWindow` | `ContextWindowConfig` | — | Automatic conversation pruning/summarization |
+| `actor` | `ToolActor` or `() => ToolActor \| null \| undefined` | — | Who tool calls act for. Passed to every tool as `ctx.actor`; the model never sees or sets it. Use a function when one instance serves several people |
+| `disableToolGuidance` | boolean | `false` | Turn off the automatic tool usage guidance added to the system prompt |
 
 ## Tools Configuration
 
@@ -60,7 +62,7 @@ const toolpack = await Toolpack.init({
 |--------|------|---------|-------------|
 | `enabled` | boolean | true | Enable tool system |
 | `autoExecute` | boolean | true | Automatically execute tool calls |
-| `maxToolRounds` | number | 5 | Max tool execution rounds per request |
+| `maxToolRounds` | number | 5 | Max tool execution rounds per request. When the cap is hit with tools still pending, the model gets one final text-only round to wrap up |
 | `toolChoicePolicy` | string | "auto" | "auto", "required", or "required_for_actions" |
 | `enabledTools` | string[] | [] | Specific tools to enable (empty = all) |
 | `enabledToolCategories` | string[] | [] | Categories to enable (empty = all) |
@@ -212,6 +214,9 @@ interface AgentRunOptions {
 
     /** Optional abort signal propagated to the underlying AIClient stream/generate call. */
     signal?: AbortSignal;
+
+    /** Called with each text delta as it is generated. When set, the run uses streaming. */
+    onChunk?: (delta: string) => void;
 }
 ```
 

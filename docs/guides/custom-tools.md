@@ -52,8 +52,29 @@ When your `execute` function runs, Toolpack passes a `ToolContext` object (`ctx`
 | Property | Type | Description |
 |-----------|------|-------------|
 | `workspaceRoot` | `string` | Absolute path to the current process working directory (where the agent is running). |
+| `actor` | `{ id: string; kind?: string } \| undefined` | Who the run acts for (for example the signed-in user), set by the host through the `actor` init option. The model never sees or sets it, so you can trust it for per-user data. `undefined` when no actor was set. |
 | `config` | `Record<string, any>` | Values from `toolsConfig.additionalConfigurations` passed to `Toolpack.init()`. |
 | `log` | `(msg: string) => void` | Writes directly to `toolpack-sdk.log` with a specific `[Tool]` prefix format for tracing |
+
+#### Per-user tools with `actor`
+
+```typescript
+const toolpack = await Toolpack.init({
+  provider: 'openai',
+  tools: true,
+  actor: () => currentRequest.getStore()?.user ?? null, // or a fixed { id, kind }
+});
+
+// In a tool:
+execute: async (args, ctx) => {
+  const userId = ctx.actor?.id;
+  // load only this user's data
+}
+```
+
+#### Returning files
+
+A tool can return a file by URL: `{ "type": "file", "mimeType": "application/pdf", "url": "https://..." }`. Anthropic and Vertex AI receive it as a native file part, and OpenAI receives images (other files get a placeholder). `data:` URIs keep working as before.
 
 ---
 

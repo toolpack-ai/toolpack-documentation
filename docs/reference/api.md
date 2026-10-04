@@ -49,6 +49,12 @@ interface ToolpackInitConfig {
     // HITL
     hitl?: HitlConfig;           // Human-in-the-loop confirmation settings
     onToolConfirm?: ToolConfirmCallback; // Confirmation handler (also enables HITL)
+
+    // Per-user tools
+    actor?: ToolActor | (() => ToolActor | null | undefined); // Passed to tools as ctx.actor
+
+    // Prompt
+    disableToolGuidance?: boolean; // Turn off the automatic tool usage guidance
 }
 ```
 
@@ -336,8 +342,14 @@ abstract class ProviderAdapter {
 Context passed to custom tools during execution.
 
 ```typescript
+interface ToolActor {
+    id: string;        // the host application's stable id for the actor
+    kind?: string;     // e.g. 'user'
+}
+
 interface ToolContext {
     workspaceRoot: string;
+    actor?: ToolActor; // who this run acts for, when the host set one
     config: Record<string, any>; // from toolsConfig.additionalConfigurations
     log: (msg: string) => void;
 }

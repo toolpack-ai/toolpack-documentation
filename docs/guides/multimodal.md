@@ -115,6 +115,10 @@ Different providers handle image inputs differently. The SDK normalizes this aut
 - **URLs** are passed directly to OpenAI, but downloaded and converted for other providers
 - **Detail level** controls image resolution/token usage (OpenAI-specific, ignored by others)
 
+### Files returned by tools
+
+A tool result can also be a file by URL: `{ "type": "file", "mimeType": "...", "url": "https://..." }`. Anthropic and Vertex AI receive it as a native file part, and OpenAI receives images (other files get a placeholder). Gemini does not support this form.
+
 ## File Attachments (Documents)
 
 Use `FilePart` to attach non-image files such as PDFs or spreadsheets. Pass a public or pre-signed URL and the MIME type:
